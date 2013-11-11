@@ -1,0 +1,3 @@
+C:\Users\ogawa\Desktop\tohoSRPG\tohoSRPG\tohoSRPGContent\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Lutyens\Documents\開発\tohoSRPG\tohoSRPG\tohoSRPGContent\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPGContent\obj\x86\Debug\ResolveAssemblyReference.cache

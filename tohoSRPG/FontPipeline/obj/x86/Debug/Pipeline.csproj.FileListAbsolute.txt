@@ -1,0 +1,10 @@
+C:\Users\Lutyens\Desktop\SimpleMessage\SimpleMessage\Pipeline\bin\x86\Debug\Pipeline.dll
+C:\Users\Lutyens\Desktop\SimpleMessage\SimpleMessage\Pipeline\bin\x86\Debug\Pipeline.pdb
+C:\Users\Lutyens\Desktop\SimpleMessage\SimpleMessage\Pipeline\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Lutyens\Desktop\SimpleMessage\SimpleMessage\Pipeline\obj\x86\Debug\Pipeline.dll
+C:\Users\Lutyens\Desktop\SimpleMessage\SimpleMessage\Pipeline\obj\x86\Debug\Pipeline.pdb
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\bin\x86\Debug\Pipeline.dll
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\bin\x86\Debug\Pipeline.pdb
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\obj\x86\Debug\Pipeline.dll
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\obj\x86\Debug\Pipeline.pdb

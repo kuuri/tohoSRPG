@@ -1,0 +1,5 @@
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\bin\x86\Release\CharacterPipeline.dll
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\bin\x86\Release\CharacterPipeline.pdb
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\obj\x86\Release\CharacterPipeline.dll
+C:\Users\Lutyens\Documents\開発\BoxSphere\BoxSphere\Pipeline\obj\x86\Release\CharacterPipeline.pdb

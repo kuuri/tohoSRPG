@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tohoSRPG", "tohoSRPG\tohoSRPG\tohoSRPG.csproj", "{305B8BDC-4099-4B24-9AFD-A841A012823E}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "tohoSRPGContent", "tohoSRPG\tohoSRPGContent\tohoSRPGContent.contentproj", "{D38A6C26-3752-4871-A579-B5A7CC4E5308}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CharacterPipeline", "tohoSRPG\FontPipeline\CharacterPipeline.csproj", "{20BF2EE7-4075-437F-8311-626A2A6DCCBB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{305B8BDC-4099-4B24-9AFD-A841A012823E}.Debug|x86.ActiveCfg = Debug|x86
+		{305B8BDC-4099-4B24-9AFD-A841A012823E}.Debug|x86.Build.0 = Debug|x86
+		{305B8BDC-4099-4B24-9AFD-A841A012823E}.Release|x86.ActiveCfg = Release|x86
+		{305B8BDC-4099-4B24-9AFD-A841A012823E}.Release|x86.Build.0 = Release|x86
+		{D38A6C26-3752-4871-A579-B5A7CC4E5308}.Debug|x86.ActiveCfg = Debug|x86
+		{D38A6C26-3752-4871-A579-B5A7CC4E5308}.Release|x86.ActiveCfg = Release|x86
+		{20BF2EE7-4075-437F-8311-626A2A6DCCBB}.Debug|x86.ActiveCfg = Debug|x86
+		{20BF2EE7-4075-437F-8311-626A2A6DCCBB}.Debug|x86.Build.0 = Debug|x86
+		{20BF2EE7-4075-437F-8311-626A2A6DCCBB}.Release|x86.ActiveCfg = Release|x86
+		{20BF2EE7-4075-437F-8311-626A2A6DCCBB}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
