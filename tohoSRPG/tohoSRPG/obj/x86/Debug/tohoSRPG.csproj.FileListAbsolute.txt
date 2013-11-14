@@ -34,7 +34,6 @@ C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\obj\x86\Debug\tohoSRP
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\obj\x86\Debug\tohoSRPG.pdb
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\effect\dot.xnb
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\battle\shadow.xnb
-C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\icon\cursor.xnb
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\effect\desaturate.xnb
 C:\Users\ogawa\Desktop\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\maptip\map.xnb
 C:\Users\ogawa\Desktop\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\bg\bg001.xnb
@@ -55,3 +54,4 @@ C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\icon\zero.xnb
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\icon\chirno.xnb
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\battle\utsuho.xnb
+C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\icon\icon.xnb

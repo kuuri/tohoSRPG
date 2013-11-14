@@ -47,13 +47,13 @@ namespace tohoSRPG
         public static Texture2D t_bg;
         static Positon drawMapOrigin;
         static Texture2D t_shadow;
-        static Texture2D t_cursor;
+        static Texture2D t_icon;
 
         /// <summary>
-        /// -10:ターン開始 -9:APチャージ
+        /// -10:ターン開始 -9:APチャージ -8:症状消滅1 -7:活気 -6:再生 -5:継続 -1:症状消滅2
         /// 0:行動選択 1:移動選択 2:対象選択 
-        /// 3:ドライヴ 4:移動 5-6:対象表示 7:行動表示 8:行動計算 9:行動
-        /// 18:SP減少 19:ドライヴ解除 20:SP溜め 21:未実装 22:行動失敗(確率) 23:行動失敗(対象不備)
+        /// 3:ドライヴ 4:移動 5-6:対象表示 7:行動表示 8:行動計算 9:行動 10:付加
+        /// 17: 連続行動 18:SP減少 19:ドライヴ解除 20:SP溜め 21:未実装 22:行動失敗(確率) 23:行動失敗(条件不満) 24:単発クリア
         /// </summary>
         static int actStage;
 
@@ -67,6 +67,7 @@ namespace tohoSRPG
         static Positon unitCursor;
         static Positon targetCursor;
 
+        static int actTimes;
         static bool drive;
         static bool moved;
         static int target;
@@ -75,6 +76,8 @@ namespace tohoSRPG
         static bool critical;
         static int damage;
         static float force;
+        static int sympTurn;
+        static int sympPower;
 
         public static void Init(GraphicsDevice g, SpriteBatch s, ContentManager c)
         {
@@ -85,7 +88,7 @@ namespace tohoSRPG
             e_dot = content.Load<Effect>("effect\\dot");
             e_desaturate = content.Load<Effect>("effect\\desaturate");
             t_shadow = content.Load<Texture2D>("img\\battle\\shadow");
-            t_cursor = content.Load<Texture2D>("img\\icon\\cursor");
+            t_icon = content.Load<Texture2D>("img\\icon\\icon");
 
             map = new MapTip[13, 13];
             mapCost = new A_Serch[13, 13];
@@ -138,16 +141,54 @@ namespace tohoSRPG
                         actStage++;
                     }
                     if (actStage == -9 && currentTime >= TimeSpan.FromMilliseconds(1000))
-                    {
+                    {// APチャージ
                         currentTime = TimeSpan.Zero;
+                        bool sympEnd = false;
+                        foreach (UnitGadget ug in allUnitGadget)
+                        {
+                            if (ug.symptonMinus.sympton > 0)
+                                ug.symptonMinus.turn--;
+                            if (ug.symptonPlus.sympton > 0)
+                                ug.symptonPlus.turn--;
+                            if (ug.trap.sympton > 0)
+                                ug.trap.turn--;
+                            if (ug.trap.sympton > 0 && ug.trap.turn <= 0)
+                                ug.trap.sympton = Trap.None;
+                            if ((ug.symptonMinus.sympton > 0 && ug.symptonMinus.turn <= 0)
+                                || ug.symptonPlus.sympton > 0 && ug.symptonPlus.turn <= 0)
+                                sympEnd = true;
+                        }
+                        if (sympEnd)
+                            actStage++;
+                        else
+                            actStage = 0;
+                    }
+                    if (actStage == -8 && currentTime >= TimeSpan.FromMilliseconds(1000))
+                    {// 症状消滅1
+                        currentTime = TimeSpan.Zero;
+                        foreach (UnitGadget ug in allUnitGadget)
+                        {
+                            if (ug.symptonMinus.sympton > 0 && ug.symptonMinus.turn <= 0)
+                                ug.symptonMinus.sympton = SymptonMinus.None;
+                            if (ug.symptonPlus.sympton > 0 && ug.symptonPlus.turn <= 0)
+                                ug.symptonPlus.sympton = SymptonPlus.None;
+                        }
+                        actStage = 0;
+                    }
+                    if (actStage == -1 && currentTime >= TimeSpan.FromMilliseconds(1000))
+                    {// 症状消滅2
+                        currentTime = TimeSpan.Zero;
+                        currentUnit.symptonMinus.sympton = SymptonMinus.None;
                         actStage = 0;
                     }
                     if (actStage == 0 && currentUnit == null)
                     {
+                        currentTime = TimeSpan.Zero;
                         currentUnit = unitOrder.Dequeue();
                         CalcMoveCost();
                         selectedAct = 0;
                         targetCursor = unitCursor = currentUnit.postion;
+                        actTimes = 0;
                         drive = currentUnit.drive;
                         moved = false;
                         target = 0;
@@ -157,6 +198,19 @@ namespace tohoSRPG
                             AddSP(currentUnit, 5);
                         if (currentUnit.trap.sympton == Trap.SPPlant)
                             AddSP(currentUnit, currentUnit.trap.power);
+
+                        if (currentUnit.symptonMinus.sympton == SymptonMinus.Stop)
+                        {
+                            int ap = currentUnit.AP;
+                            currentUnit.AP -= currentUnit.symptonMinus.power;
+                            if (currentUnit.AP < 0)
+                                currentUnit.AP = 0;
+                            currentUnit.symptonMinus.power -= ap;
+                        }
+
+                        if ((currentUnit.symptonMinus.sympton > 0 && currentUnit.symptonMinus.turn <= 0)
+                            || (currentUnit.symptonMinus.sympton == SymptonMinus.Stop && currentUnit.symptonMinus.power <= 0))
+                            actStage = -1;
                     }
                     if (actStage >= 0 && actStage <= 2)
                     {
@@ -261,12 +315,7 @@ namespace tohoSRPG
                                     if (currentUnit.drive != drive)
                                         actStage = 3;
                                     else if (!moved)
-                                    {
-                                        if (currentUnit.drive)
-                                            actStage = 18;
-                                        else
-                                            actStage = 20;
-                                    }
+                                        TurnEnd();
                                     else
                                         actStage = 4;
                                 }
@@ -386,12 +435,7 @@ namespace tohoSRPG
                             {
                                 currentTime = TimeSpan.Zero;
                                 if (selectedAct == 0 && !moved)
-                                {
-                                    if (currentUnit.drive)
-                                        actStage = 18;
-                                    else
-                                        TurnEnd();
-                                }
+                                    TurnEnd();
                                 else if (selectedAct > 0 && !moved)
                                     actStage = 5;
                                 else
@@ -409,12 +453,7 @@ namespace tohoSRPG
                                     currentUnit.postion = goal;
                                 }
                                 else if (selectedAct == 0)
-                                {
-                                    if (currentUnit.drive)
-                                        actStage = 18;
-                                    else
-                                        TurnEnd();
-                                }
+                                    TurnEnd();
                                 else
                                     actStage++;
                             }
@@ -432,7 +471,7 @@ namespace tohoSRPG
                             if (currentTime >= TimeSpan.FromMilliseconds(1500))
                             {
                                 currentTime = TimeSpan.Zero;
-                                UnitGadget target = GetActTarget()[0];
+                                UnitGadget target = GetActTarget()[BattleScene.target];
                                 if ((currentAct.type >= ActType.Booster)
                                     ||(currentAct.type == ActType.ClearMinusSympton && !IsTargetAlly(target) && target.symptonMinus.sympton != SymptonMinus.MinusInvalid)
                                     ||(currentAct.type == ActType.ClearPlusSympton && IsTargetAlly(target) && target.symptonPlus.sympton != SymptonPlus.PlusInvalid)
@@ -442,7 +481,7 @@ namespace tohoSRPG
                                 {
                                     actStage = 23;
                                 }
-                                else if (currentAct.TypeInt % 100 == 0)
+                                else if (currentAct.TypeInt % 100 == 0 || currentAct.TypeInt % 2 == 1)
                                 {
                                     actStage++;
                                 }
@@ -454,11 +493,83 @@ namespace tohoSRPG
                         }
                         else if (actStage == 8) // 行動計算
                         {
-                            if (currentAct.TypeInt % 100 == 0)
+                            if (currentAct.TypeInt % 2 == 0)
                             {
-                                CalcAttackResult(GetActTarget()[target++]);
                                 currentTime = TimeSpan.Zero;
-                                actStage++;
+                                UnitGadget ug = GetActTarget()[target++];
+                                if (currentAct.TypeInt % 100 == 0 && ug.trap.sympton == Trap.OnceClear)
+                                {
+                                    ug.trap.sympton = Trap.None;
+                                    actStage = 24;
+                                }
+                                else
+                                {
+                                    CalcAttackResult(ug);
+                                    if (hit)
+                                    {
+                                        if (currentAct.TypeInt % 100 == 0)
+                                        {
+                                            AddHP(ug, -damage);
+                                            AddSP(ug, 10);
+                                        }
+                                        if (currentAct.sympton > 0 && !ug.IsType(Type.Apparition))
+                                        {
+                                            ug.symptonMinus.sympton = (SymptonMinus)currentAct.sympton;
+                                            ug.symptonMinus.power = sympPower;
+                                            ug.symptonMinus.turn = sympTurn;
+                                        }
+                                        actStage = 10;
+                                    }
+                                    else
+                                        actStage = 22;
+                                    if (currentAct.TypeInt % 100 == 0)
+                                        actStage = 9;
+                                }
+                            }
+                            else if (currentAct.TypeInt % 2 == 1)
+                            {
+                                currentTime = TimeSpan.Zero;
+                                UnitGadget ug = GetActTarget()[target++];
+                                CalcSupportResult();
+                                if (hit)
+                                {
+                                    switch (currentAct.type)
+                                    {
+                                        case ActType.Heal:
+                                            AddHP(ug, damage);
+                                            actStage++;
+                                            break;
+                                        case ActType.AddPlusSympton:
+                                            ug.symptonPlus.sympton = (SymptonPlus)currentAct.sympton;
+                                            ug.symptonPlus.power = sympPower;
+                                            ug.symptonPlus.turn = sympTurn;
+                                            actStage = 10;
+                                            break;
+                                        case ActType.SPUp:
+                                            AddSP(ug, damage);
+                                            actStage++;
+                                            break;
+                                        case ActType.LevelDrain:
+                                            if (ug.level < damage)
+                                                damage = ug.level;
+                                            AddLevel(ug, -damage);
+                                            AddLevel(currentUnit, damage);
+                                            actStage++;
+                                            break;
+                                        case ActType.SPDrain:
+                                            if (ug.SP < damage)
+                                                damage = ug.SP;
+                                            AddSP(ug, -damage);
+                                            AddSP(currentUnit, damage);
+                                            actStage++;
+                                            break;
+                                        default:
+                                            actStage = 22;
+                                            break;
+                                    }
+                                }
+                                else
+                                    actStage = 22;
                             }
                         }
                         else if (actStage == 9) // 行動
@@ -466,21 +577,39 @@ namespace tohoSRPG
                             if (currentTime >= TimeSpan.FromMilliseconds(2000))
                             {
                                 currentTime = TimeSpan.Zero;
-                                if (currentAct.TypeInt % 100 == 0 && hit)
+                                if (currentAct.TypeInt % 100 == 0)
                                 {
-                                    UnitGadget ug = GetActTarget()[target - 1];
-                                    AddHP(ug, -damage);
-                                    AddSP(ug, 10);
+                                    if (currentAct.IsTargetAll && target < GetActTarget().Count)
+                                        actStage--;
+                                    else
+                                    {
+                                        if (currentAct.sympton > 0 && hit)
+                                            actStage++;
+                                        else
+                                            TurnEnd();
+                                    }
                                 }
-                                if (currentAct.IsTargetAll && target < GetActTarget().Count)
-                                    actStage--;
                                 else
                                 {
-                                    if (currentUnit.drive)
-                                        actStage = 18;
-                                    else
-                                        TurnEnd();
+                                    TurnEnd();
                                 }
+                            }
+                        }
+                        else if (actStage == 10) // 付加
+                        {
+                            if (currentTime >= TimeSpan.FromMilliseconds(2000))
+                            {
+                                currentTime = TimeSpan.Zero;
+                                TurnEnd();
+                            }
+                        }
+                        else if (actStage == 17) // 連続行動
+                        {
+                            if (currentTime >= TimeSpan.FromMilliseconds(2000))
+                            {
+                                currentTime = TimeSpan.Zero;
+                                actTimes++;
+                                actStage = 0;
                             }
                         }
                         else if (actStage == 18) // SP減少
@@ -493,10 +622,8 @@ namespace tohoSRPG
                                 if (currentUnit.SP <= 0)
                                 {
                                     currentUnit.drive = false;
-                                    actStage++;
+                                    actStage = 19;
                                 }
-                                else if (selectedAct == 0 && !moved && usingAP == 0)
-                                    actStage = 20;
                                 else
                                     TurnEnd();
                             }
@@ -506,10 +633,7 @@ namespace tohoSRPG
                             if (currentTime >= TimeSpan.FromMilliseconds(1000))
                             {
                                 currentTime = TimeSpan.Zero;
-                                if (selectedAct == 0 && !moved)
-                                    actStage++;
-                                else
-                                    TurnEnd();
+                                TurnEnd();
                             }
                         }
                         else if (actStage == 20) // SP溜め
@@ -525,10 +649,7 @@ namespace tohoSRPG
                             if (currentTime >= TimeSpan.FromMilliseconds(2000))
                             {
                                 currentTime = TimeSpan.Zero;
-                                if (currentUnit.drive)
-                                    actStage = 18;
-                                else
-                                    TurnEnd();
+                                TurnEnd();
                             }
                         }
                         #endregion
@@ -692,12 +813,32 @@ namespace tohoSRPG
                     float t = (float)currentTime.TotalMilliseconds / tt;
                     float s = 1 + t;
                     float a = 1 - t;
-                    spriteBatch.Draw(t_cursor, v, new Rectangle(200, 72, 48, 48), new Color(a, a, a, a), 0, new Vector2(24, 24), s, SpriteEffects.None, 0);
+                    spriteBatch.Draw(t_icon, v, new Rectangle(200, 72, 48, 48), new Color(a, a, a, a), 0, new Vector2(24, 24), s, SpriteEffects.None, 0);
                 }
 
                 // ユニットアイコン描画
                 foreach (UnitGadget ug in allUnitGadget)
-                    spriteBatch.Draw(ug.unit.t_icon, new Rectangle(drawMapOrigin.X + ug.postion.X * 48 - 6, drawMapOrigin.Y + ug.postion.Y * 48 - 6, 48, 48), Color.White);
+                {
+                    spriteBatch.Draw(ug.unit.t_icon, drawMapOrigin + new Vector2(ug.postion.X * 48 - 6, ug.postion.Y * 48 - 6), Color.White);
+                    if (ug.symptonMinus.sympton > 0)
+                    {
+                        Vector2 p;
+                        if (ug.ff == FrendOfFoe.Ally)
+                            p = drawMapOrigin + new Vector2(ug.postion.X * 48 - 6, ug.postion.Y * 48 - 6);
+                        else
+                            p = drawMapOrigin + new Vector2(ug.postion.X * 48 + 18, ug.postion.Y * 48 - 6);
+                        spriteBatch.Draw(t_icon, p, new Rectangle((int)(ug.symptonMinus.sympton - 1) * 24, 144, 24, 24), Color.White);
+                    }
+                    if (ug.symptonPlus.sympton > 0)
+                    {
+                        Vector2 p;
+                        if (ug.ff == FrendOfFoe.Ally)
+                            p = drawMapOrigin + new Vector2(ug.postion.X * 48 + 18, ug.postion.Y * 48 - 6);
+                        else
+                            p = drawMapOrigin + new Vector2(ug.postion.X * 48 - 6, ug.postion.Y * 48 - 6);
+                        spriteBatch.Draw(t_icon, p, new Rectangle((int)(ug.symptonPlus.sympton - 1) * 24, 168, 24, 24), Color.White);
+                    }
+                }
             }
 
             if (battleStart && !IsMapMoving())
@@ -712,13 +853,17 @@ namespace tohoSRPG
                     foreach (UnitGadget ug in allUnitGadget)
                     {
                         Vector2 pos = drawMapOrigin + new Vector2(ug.postion.X * 48, ug.postion.Y * 48 + 18 - (int)GetIconFact());
-                        spriteBatch.Draw(t_cursor, pos, new Rectangle(120, 120, 12, 24), Color.White);
+                        spriteBatch.Draw(t_icon, pos, new Rectangle(120, 120, 12, 24), Color.White);
                         if (ug.AP > 10)
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(12, 0), new Rectangle(12 * (ug.AP / 10), 120, 12, 24), Color.White);
-                        spriteBatch.Draw(t_cursor, pos + new Vector2(24, 0), new Rectangle(12 * (ug.AP % 10), 120, 12, 24), Color.White);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(12, 0), new Rectangle(12 * (ug.AP / 10), 120, 12, 24), Color.White);
+                        spriteBatch.Draw(t_icon, pos + new Vector2(24, 0), new Rectangle(12 * (ug.AP % 10), 120, 12, 24), Color.White);
                     }
 
                     Helper.DrawWindowBottom1("ユニットのAPチャージ!");
+                }
+                else if (actStage == -8 || actStage == -1)
+                {
+                    Helper.DrawWindowBottom1("症状の効果が切れた！");
                 }
                 else if (currentUnit == null)
                 {
@@ -728,9 +873,9 @@ namespace tohoSRPG
                     if (true)//currentUnit.ff == FrendOfFoe.Ally)
                     {
                         // ユニット情報描画
-                        spriteBatch.Draw(t_cursor, new Vector2(10, 10), new Rectangle((int)currentUnit.unit.type * 32, 72, 32, 32), Color.White);
+                        spriteBatch.Draw(t_icon, new Vector2(10, 10), new Rectangle((int)currentUnit.unit.type * 32, 72, 32, 32), Color.White);
                         if (currentUnit.drive)
-                            spriteBatch.Draw(t_cursor, new Vector2(26, 26), new Rectangle((int)currentUnit.unit.type2 * 16, 104, 16, 16), Color.White);
+                            spriteBatch.Draw(t_icon, new Vector2(26, 26), new Rectangle((int)currentUnit.unit.type2 * 16, 104, 16, 16), Color.White);
                         Helper.DrawStringWithShadow(currentUnit.unit.name, new Vector2(52, 10));
                         Helper.DrawStringWithShadow("HP:", new Vector2(10, 39));
                         str = currentUnit.HP.ToString();
@@ -754,20 +899,20 @@ namespace tohoSRPG
                         float t = (float)currentTime.TotalMilliseconds * 0.2f;
                         if (t > 20)
                             t = 20;
-                        spriteBatch.Draw(t_cursor, new Vector2(30 - t, 120 + t / 2), new Rectangle(248, (currentUnit.actPage + 1) % 2 * 24, 48, 24), Color.Gray);
-                        spriteBatch.Draw(t_cursor, new Vector2(10 + t, 130 - t / 2), new Rectangle(248, currentUnit.actPage * 24, 48, 24), Color.White);
+                        spriteBatch.Draw(t_icon, new Vector2(30 - t, 120 + t / 2), new Rectangle(248, (currentUnit.actPage + 1) % 2 * 24, 48, 24), Color.Gray);
+                        spriteBatch.Draw(t_icon, new Vector2(10 + t, 130 - t / 2), new Rectangle(248, currentUnit.actPage * 24, 48, 24), Color.White);
 
                         if (currentUnit.unit.IsHaveAbility(Ability.Drive))
                         {
                             if (drive)
                             {
-                                spriteBatch.Draw(t_cursor, new Vector2(210, 120), new Rectangle(248, 72, 48, 24), Color.White);
-                                spriteBatch.Draw(t_cursor, new Vector2(220, 140), new Rectangle(248, 120, 48, 24), Color.White);
+                                spriteBatch.Draw(t_icon, new Vector2(210, 120), new Rectangle(248, 72, 48, 24), Color.White);
+                                spriteBatch.Draw(t_icon, new Vector2(220, 140), new Rectangle(248, 120, 48, 24), Color.White);
                             }
                             else if ((currentUnit.SP >= 10 && currentUnit.AP >= 6) || currentUnit.drive)
-                                spriteBatch.Draw(t_cursor, new Vector2(210, 120), new Rectangle(248, 48, 48, 24), Color.White);
+                                spriteBatch.Draw(t_icon, new Vector2(210, 120), new Rectangle(248, 48, 48, 24), Color.White);
                             else
-                                spriteBatch.Draw(t_cursor, new Vector2(210, 120), new Rectangle(248, 96, 48, 24), Color.White);
+                                spriteBatch.Draw(t_icon, new Vector2(210, 120), new Rectangle(248, 96, 48, 24), Color.White);
                         }
 
                         Rectangle rect = new Rectangle(96, 0, 54, 45);
@@ -776,32 +921,32 @@ namespace tohoSRPG
                             color = Color.White;
                         else
                             color = Color.Gray;
-                        spriteBatch.Draw(t_cursor, new Vector2(144, 300), rect, color, MathHelper.Pi, new Vector2(25, 23), 1, SpriteEffects.None, 0);
-                        spriteBatch.Draw(t_cursor, new Vector2(132, 286), new Rectangle(0, 48, 24, 24), color);
+                        spriteBatch.Draw(t_icon, new Vector2(144, 300), rect, color, MathHelper.Pi, new Vector2(25, 23), 1, SpriteEffects.None, 0);
+                        spriteBatch.Draw(t_icon, new Vector2(132, 286), new Rectangle(0, 48, 24, 24), color);
 
                         Act a = currentUnit.unit.acts[currentUnit.actPage * 3];
                         if (selectedAct == 1 || selectedAct == 4)
                             color = Color.White;
                         else
                             color = Color.Gray;
-                        spriteBatch.Draw(t_cursor, new Vector2(144, 130), rect, color, 0, new Vector2(25, 23), 1, SpriteEffects.None, 0);
-                        spriteBatch.Draw(t_cursor, new Vector2(133, 118), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), color);
+                        spriteBatch.Draw(t_icon, new Vector2(144, 130), rect, color, 0, new Vector2(25, 23), 1, SpriteEffects.None, 0);
+                        spriteBatch.Draw(t_icon, new Vector2(133, 118), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), color);
 
                         a = currentUnit.unit.acts[currentUnit.actPage * 3 + 1];
                         if (selectedAct == 2 || selectedAct == 5)
                             color = Color.White;
                         else
                             color = Color.Gray;
-                        spriteBatch.Draw(t_cursor, new Vector2(30, 215), rect, color, -MathHelper.PiOver2, new Vector2(25, 23), 1, SpriteEffects.None, 0);
-                        spriteBatch.Draw(t_cursor, new Vector2(20, 203), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), color);
+                        spriteBatch.Draw(t_icon, new Vector2(30, 215), rect, color, -MathHelper.PiOver2, new Vector2(25, 23), 1, SpriteEffects.None, 0);
+                        spriteBatch.Draw(t_icon, new Vector2(20, 203), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), color);
 
                         a = currentUnit.unit.acts[currentUnit.actPage * 3 + 2];
                         if (selectedAct == 3 || selectedAct == 6)
                             color = Color.White;
                         else
                             color = Color.Gray;
-                        spriteBatch.Draw(t_cursor, new Vector2(258, 215), rect, color, MathHelper.PiOver2, new Vector2(25, 23), 1, SpriteEffects.None, 0);
-                        spriteBatch.Draw(t_cursor, new Vector2(246, 203), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), color);
+                        spriteBatch.Draw(t_icon, new Vector2(258, 215), rect, color, MathHelper.PiOver2, new Vector2(25, 23), 1, SpriteEffects.None, 0);
+                        spriteBatch.Draw(t_icon, new Vector2(246, 203), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), color);
                         #endregion
 
                         // 行動詳細
@@ -841,26 +986,26 @@ namespace tohoSRPG
                             Vector2 pos = drawMapOrigin + new Vector2(18 + currentUnit.postion.X * 48, 18 + currentUnit.postion.Y * 48);
                             float r = GetCursorFact(gameTime.TotalGameTime, 30, 8, 300);
                             rect = new Rectangle(0, 0, 24, 24);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(-r, -r), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(r, -r), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(r, r), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(-r, r), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(-r, -r), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(r, -r), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(r, r), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(-r, r), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
                         }
                         else if (actStage == 1)
                         {
                             Vector2 pos = drawMapOrigin + new Vector2(18 + unitCursor.X * 48, 18 + unitCursor.Y * 48);
                             float r = GetCursorFact(gameTime.TotalGameTime, 45, 15, 600);
                             rect = new Rectangle(0, 24, 24, 24);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(0, -r), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(r, 0), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(0, r), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                            spriteBatch.Draw(t_cursor, pos + new Vector2(-r, 0), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(0, -r), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(r, 0), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(0, r), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, pos + new Vector2(-r, 0), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
                         }
                         else if (actStage == 2)
                         {
                             Vector2 pos = unitCursor;
                             if (unitCursor != currentUnit.postion)
-                                spriteBatch.Draw(currentUnit.unit.t_icon, drawMapOrigin + new Vector2(pos.X * 48 + 2, pos.Y * 48 + 2), new Color(128, 128, 128, 128));
+                                spriteBatch.Draw(currentUnit.unit.t_icon, drawMapOrigin + new Vector2(pos.X * 48 - 6, pos.Y * 48 - 6), new Color(128, 128, 128, 128));
                             float f;
                             bool aim = false;
                             rect = new Rectangle(24, 0, 24, 24);
@@ -873,15 +1018,15 @@ namespace tohoSRPG
                                 pos = drawMapOrigin + new Vector2(-6 + p.X * 48, -6 + p.Y * 48);
                                 f = GetCursorFact(gameTime.TotalGameTime, 1, 0, 1200);
                                 if (f >= 0.5 || targetCursor == p)
-                                    spriteBatch.Draw(t_cursor, pos, new Rectangle(48, 0, 48, 48), Color.White);
+                                    spriteBatch.Draw(t_icon, pos, new Rectangle(48, 0, 48, 48), Color.White);
                                 if (p == targetCursor || a.IsTargetAll)
                                 {
                                     pos += new Vector2(24, 24);
                                     f = GetCursorFact2(gameTime.TotalGameTime, 15, 8, 450);
-                                    spriteBatch.Draw(t_cursor, pos + new Vector2(-f, -f), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                                    spriteBatch.Draw(t_cursor, pos + new Vector2(f, -f), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                                    spriteBatch.Draw(t_cursor, pos + new Vector2(f, f), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                                    spriteBatch.Draw(t_cursor, pos + new Vector2(-f, f), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                    spriteBatch.Draw(t_icon, pos + new Vector2(-f, -f), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                    spriteBatch.Draw(t_icon, pos + new Vector2(f, -f), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                    spriteBatch.Draw(t_icon, pos + new Vector2(f, f), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                    spriteBatch.Draw(t_icon, pos + new Vector2(-f, f), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
                                     aim = true;
                                 }
                             }
@@ -889,11 +1034,12 @@ namespace tohoSRPG
                             {
                                 pos = drawMapOrigin + new Vector2(18 + targetCursor.X * 48, 18 + targetCursor.Y * 48);
                                 f = GetCursorFact(gameTime.TotalGameTime, 35, 8, 450);
-                                spriteBatch.Draw(t_cursor, pos + new Vector2(-f, -f), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                                spriteBatch.Draw(t_cursor, pos + new Vector2(f, -f), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                                spriteBatch.Draw(t_cursor, pos + new Vector2(f, f), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                                spriteBatch.Draw(t_cursor, pos + new Vector2(-f, f), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                spriteBatch.Draw(t_icon, pos + new Vector2(-f, -f), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                spriteBatch.Draw(t_icon, pos + new Vector2(f, -f), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                spriteBatch.Draw(t_icon, pos + new Vector2(f, f), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                                spriteBatch.Draw(t_icon, pos + new Vector2(-f, f), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
                             }
+                            PrintActSuccessRate();
                         }
                         #endregion
                     }
@@ -906,47 +1052,43 @@ namespace tohoSRPG
                     Positon p = unitCursor;
                     while (p != currentUnit.postion)
                     {
-                        spriteBatch.Draw(currentUnit.unit.t_icon,
-                            new Rectangle(drawMapOrigin.X + p.X * 48 - 6, drawMapOrigin.Y + p.Y * 48 - 6, 48, 48), new Color(128, 128, 128, 128));
+                        spriteBatch.Draw(currentUnit.unit.t_icon, drawMapOrigin + new Vector2(p.X * 48 - 6, p.Y * 48 - 6), new Color(128, 128, 128, 128));
+                        spriteBatch.Draw(t_icon, drawMapOrigin + new Vector2(p.X * 48 + 6, p.Y * 48 + 6), new Rectangle(160, 104, 24, 24), Color.White);
                         p = mapCost[p.X, p.Y].parent;
                     }
                     Vector2 pos = drawMapOrigin + new Vector2(18 + targetCursor.X * 48, 18 + targetCursor.Y * 48);
                     float r = GetCursorFact(gameTime.TotalGameTime, 35, 8, 300);
                     Rectangle rect = new Rectangle(0, 0, 24, 24);
-                    spriteBatch.Draw(t_cursor, pos + new Vector2(-r, -r), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                    spriteBatch.Draw(t_cursor, pos + new Vector2(r, -r), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                    spriteBatch.Draw(t_cursor, pos + new Vector2(r, r), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
-                    spriteBatch.Draw(t_cursor, pos + new Vector2(-r, r), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                    spriteBatch.Draw(t_icon, pos + new Vector2(-r, -r), rect, Color.White, 0, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                    spriteBatch.Draw(t_icon, pos + new Vector2(r, -r), rect, Color.White, MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                    spriteBatch.Draw(t_icon, pos + new Vector2(r, r), rect, Color.White, MathHelper.Pi, new Vector2(12, 12), 1, SpriteEffects.None, 0);
+                    spriteBatch.Draw(t_icon, pos + new Vector2(-r, r), rect, Color.White, -MathHelper.PiOver2, new Vector2(12, 12), 1, SpriteEffects.None, 0);
                 }
                 else if (actStage == 5 || actStage == 6) // 対象表示
                 {
                     float t = (float)currentTime.TotalMilliseconds / 400;
-                    if (currentAct.IsTargetAll)
+                    if (t > 0.1)
                     {
-                        List<UnitGadget> lug = GetActTarget();
-                        for (int i = 0; i < lug.Count; i++)
+                        t = (t - 0.1f) * 1.11111f;
+                        if (currentAct.IsTargetAll)
                         {
-                            Positon tar = lug[i].postion;
-                            Vector2 v = drawMapOrigin + new Vector2(48 * MathHelper.Lerp(currentUnit.postion.X, tar.X, t) - 6,
-                                48 * MathHelper.Lerp(currentUnit.postion.Y, tar.Y, t) - 6);
+                            List<UnitGadget> lug = GetActTarget();
+                            for (int i = 0; i < lug.Count; i++)
+                            {
+                                Positon tar = lug[i].postion;
+                                Vector2 v = drawMapOrigin + new Vector2(48 * MathHelper.Lerp(currentUnit.postion.X, tar.X, t) - 6,
+                                    48 * MathHelper.Lerp(currentUnit.postion.Y, tar.Y, t) - 6);
 
-                            spriteBatch.Draw(t_cursor, v, new Rectangle(48, 0, 48, 48), Color.White);
+                                spriteBatch.Draw(t_icon, v, new Rectangle(48, 0, 48, 48), Color.White);
+                            }
                         }
-                    }
-                    else if (targetCursor == unitCursor)
-                    {
-                        if (t > 0.2)
+                        else
                         {
-                            Vector2 v = drawMapOrigin + new Vector2(48 * currentUnit.postion.X - 6, 48 * currentUnit.postion.Y - 6);
-                            spriteBatch.Draw(t_cursor, v, new Rectangle(48, 0, 48, 48), Color.White);
-                        }
-                    }
-                    else
-                    {
-                        Vector2 v = drawMapOrigin + new Vector2(48 * MathHelper.Lerp(currentUnit.postion.X, targetCursor.X, t) - 6,
-                            48 * MathHelper.Lerp(currentUnit.postion.Y, targetCursor.Y, t) - 6);
+                            Vector2 v = drawMapOrigin + new Vector2(48 * MathHelper.Lerp(currentUnit.postion.X, targetCursor.X, t) - 6,
+                                48 * MathHelper.Lerp(currentUnit.postion.Y, targetCursor.Y, t) - 6);
 
-                        spriteBatch.Draw(t_cursor, v, new Rectangle(48, 0, 48, 48), Color.White);
+                            spriteBatch.Draw(t_icon, v, new Rectangle(48, 0, 48, 48), Color.White);
+                        }
                     }
                 }
                 else if (actStage == 7) // 行動表示
@@ -964,19 +1106,168 @@ namespace tohoSRPG
                         if (!hit)
                         {
                             Vector2 pos = drawMapOrigin + new Vector2(target.postion.X * 48 - 6, target.postion.Y * 48 + 2 - (int)GetIconFact());
-                            spriteBatch.Draw(t_cursor, pos, new Rectangle(152, 32, 48, 32), Color.White);
+                            spriteBatch.Draw(t_icon, pos, new Rectangle(152, 32, 48, 32), Color.White);
                             Helper.DrawWindowBottom1(target.unit.nickname + "は攻撃を回避した！");
                         }
                         else
                         {
                             Vector2 pos = drawMapOrigin + new Vector2(target.postion.X * 48 - 6, target.postion.Y * 48 + 2 - (int)GetIconFact());
                             if (critical)
-                                spriteBatch.Draw(t_cursor, pos, new Rectangle(200, 0, 48, 32), Color.White);
+                                spriteBatch.Draw(t_icon, pos, new Rectangle(200, 0, 48, 32), Color.White);
                             else
-                                spriteBatch.Draw(t_cursor, pos, new Rectangle(200, 32, 48, 32), Color.White);
+                                spriteBatch.Draw(t_icon, pos, new Rectangle(200, 32, 48, 32), Color.White);
                             Helper.DrawWindowBottom1(target.unit.nickname + "に" + damage + "のダメージ！");
                         }
                     }
+                    else if (currentAct.type == ActType.Heal)
+                    {
+                        UnitGadget target = GetActTarget()[BattleScene.target - 1];
+                        Helper.DrawWindowBottom1(target.unit.nickname + "のHPが" + damage + "回復！");
+                    }
+                    else if (currentAct.type == ActType.SPUp)
+                    {
+                        Helper.DrawWindowBottom1("SPが" + damage + "ポイント増加した！");
+                    }
+                    else if (currentAct.type == ActType.LevelDrain)
+                    {
+                        Helper.DrawWindowBottom1("レベルを" + damage + "吸収した！");
+                    }
+                    else if (currentAct.type == ActType.SPDrain)
+                    {
+                        Helper.DrawWindowBottom1("SPを" + damage + "ポイント吸収した！");
+                    }
+                }
+                else if (actStage == 10) // 付加
+                {
+                    #region
+                    if (currentAct.TypeInt % 100 == 0 || currentAct.type == ActType.AddMinusSympton)
+                    {
+                        switch ((SymptonMinus)currentAct.sympton)
+                        {
+                            case SymptonMinus.Slip:
+                                Helper.DrawWindowBottom1("継続のマイナス症状！ターン始めにダメージ！");
+                                break;
+                            case SymptonMinus.Distract:
+                                Helper.DrawWindowBottom1("散漫のマイナス症状！行動が失敗しやすくなる！");
+                                break;
+                            case SymptonMinus.Restraint:
+                                Helper.DrawWindowBottom1("束縛のマイナス症状！移動のAPが多くなる！");
+                                break;
+                            case SymptonMinus.Stop:
+                                Helper.DrawWindowBottom1("停止のマイナス症状！APが失われ行動が出来ない！");
+                                break;
+                            case SymptonMinus.Confuse:
+                                Helper.DrawWindowBottom1("混乱のマイナス症状！行動が決められない！");
+                                break;
+                            case SymptonMinus.Dedodge:
+                                Helper.DrawWindowBottom1("回避不能のマイナス症状！回避が出来ない！");
+                                break;
+                            case SymptonMinus.Deguard:
+                                Helper.DrawWindowBottom1("防御不能のマイナス症状！防御が出来ない！");
+                                break;
+                            case SymptonMinus.FixInside:
+                                Helper.DrawWindowBottom1(sympPower + "グリッド以上離れられない！");
+                                break;
+                            case SymptonMinus.FixOutside:
+                                Helper.DrawWindowBottom1(sympPower + "グリッド以内に近づくことが出来ない！");
+                                break;
+                            case SymptonMinus.CarvedSeal:
+                                Helper.DrawWindowBottom1("刻印のマイナス症状！詳細不明！");
+                                break;
+                        }
+                    }
+                    else if (currentAct.type == ActType.AddPlusSympton)
+                    {
+                        switch ((SymptonPlus)currentAct.sympton)
+                        {
+                            case SymptonPlus.Heal:
+                                Helper.DrawWindowBottom1("再生のプラス症状！ターン始めに回復！");
+                                break;
+                            case SymptonPlus.Charge:
+                                Helper.DrawWindowBottom1("活気のプラス症状！APがアップする！");
+                                break;
+                            case SymptonPlus.Concentrate:
+                                Helper.DrawWindowBottom1("集中のプラス症状！成功と回避がアップ！");
+                                break;
+                            case SymptonPlus.Swift:
+                                Helper.DrawWindowBottom1("俊足のプラス症状！移動のAPが少なくなる！");
+                                break;
+                            case SymptonPlus.ActAgain:
+                                Helper.DrawWindowBottom1("1ターンに複数回行動できる！");
+                                break;
+                        }
+                    }
+                    else if (currentAct.type == ActType.SetTrap)
+                    {
+                        switch ((Trap)currentAct.sympton)
+                        {
+                            case Trap.GrappleTrap:
+                                Helper.DrawWindowBottom1("格闘トラップで格闘攻撃にダメージ！");
+                                break;
+                            case Trap.ShotTrap:
+                                Helper.DrawWindowBottom1("射撃トラップで射撃攻撃にダメージ！");
+                                break;
+                            case Trap.AttackTrap:
+                                Helper.DrawWindowBottom1("攻撃トラップで全ての攻撃にダメージ！");
+                                break;
+                            case Trap.OnceClear:
+                                Helper.DrawWindowBottom1("単発クリアで1回だけ攻撃を無効にする！");
+                                break;
+                            case Trap.SPPlant:
+                                Helper.DrawWindowBottom1("SPプラントで行動するたびSPがアップ！");
+                                break;
+                            case Trap.MagicCharge:
+                                Helper.DrawWindowBottom1(currentUnit.unit.nickname + "に魔力が集まった！");
+                                break;
+                        }
+                    }
+                    else if (currentAct.type == ActType.SetCrystal)
+                    {
+                        switch ((CrystalEffect)currentAct.sympton)
+                        {
+                            case CrystalEffect.HPDamage:
+                                Helper.DrawWindowBottom1("結晶解放！ターン始めにダメージ！");
+                                break;
+                            case CrystalEffect.HPHeal:
+                                Helper.DrawWindowBottom1("結晶解放！ターン始めに回復！");
+                                break;
+                            case CrystalEffect.ForbidHeal:
+                                Helper.DrawWindowBottom1("結晶解放！一切の回復ができない");
+                                break;
+                            case CrystalEffect.APUp:
+                                Helper.DrawWindowBottom1("結晶解放！APがアップする！");
+                                break;
+                            case CrystalEffect.APDown:
+                                Helper.DrawWindowBottom1("結晶解放！APが少なくなる！");
+                                break;
+                            case CrystalEffect.CostUp:
+                                Helper.DrawWindowBottom1("結晶解放！移動のAPが多くなる！");
+                                break;
+                            case CrystalEffect.HitUp:
+                                Helper.DrawWindowBottom1("結晶解放！成功がアップする！");
+                                break;
+                            case CrystalEffect.DamageUp:
+                                Helper.DrawWindowBottom1("結晶解放！全てのダメージが減少する！");
+                                break;
+                            case CrystalEffect.DamageDown:
+                                Helper.DrawWindowBottom1("結晶解放！全てのダメージが増加する！");
+                                break;
+                            case CrystalEffect.TimeStop:
+                                Helper.DrawWindowBottom1("結晶解放！時間が止まり誰も行動できなくなる！");
+                                break;
+                            case CrystalEffect.AffinityDown:
+                                Helper.DrawWindowBottom1("結晶解放！地形の相性が悪くなる！");
+                                break;
+                        }
+                    }
+                    #endregion
+                }
+                else if (actStage == 17) // 連続行動
+                {
+                    if (actTimes == 0 && currentUnit.unit.IsHaveAbility(Ability.ActAgain))
+                        Helper.DrawWindowBottom1("アビリティによりもう一度行動が可能になった！");
+                    else
+                        Helper.DrawWindowBottom1("プラス症状によりもう一度行動が可能になった！");
                 }
                 else if (actStage == 18) // SP減少
                 {
@@ -996,7 +1287,7 @@ namespace tohoSRPG
                             float dd = 10 + (15 + d % 5) * t;
                             float ss = (0.3f + s % 0.6f) * t;
                             Vector2 vv = v + dd * new Vector2((float)Math.Cos(p), (float)Math.Sin(p));
-                            spriteBatch.Draw(t_cursor, vv, new Rectangle(184, 104, 16, 16), new Color(a, a, a, a), 0, new Vector2(8, 8), ss, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, vv, new Rectangle(184, 104, 16, 16), new Color(a, a, a, a), 0, new Vector2(8, 8), ss, SpriteEffects.None, 0);
                         }
                     }
                 }
@@ -1022,16 +1313,20 @@ namespace tohoSRPG
                             float dd = 10 + (15 + d % 5) * (1 - t);
                             float ss = (0.3f + s % 0.6f) * (1 - t);
                             Vector2 vv = v + dd * new Vector2((float)Math.Cos(p), (float)Math.Sin(p));
-                            spriteBatch.Draw(t_cursor, vv, new Rectangle(184, 104, 16, 16), new Color(a, a, a, a), 0, new Vector2(8, 8), ss, SpriteEffects.None, 0);
+                            spriteBatch.Draw(t_icon, vv, new Rectangle(184, 104, 16, 16), new Color(a, a, a, a), 0, new Vector2(8, 8), ss, SpriteEffects.None, 0);
                         }
                     }
 
-                    Helper.DrawWindowBottom1("SPが" + (currentUnit.AP - usingAP) + "ポイント増加した！");
+                    Helper.DrawWindowBottom1("SPが" + currentUnit.AP + "ポイント増加した！");
+                }
+                else if (actStage == 24) // 単発クリア
+                {
+                    Helper.DrawWindowBottom1("単発クリアにより攻撃が打ち消された！");
                 }
                 else
                 {
                     Vector2 pos = drawMapOrigin + new Vector2(currentUnit.postion.X * 48 - 6, currentUnit.postion.Y * 48 + 2 - (int)GetIconFact());
-                    spriteBatch.Draw(t_cursor, pos, new Rectangle(152, 0, 48, 32), Color.White);
+                    spriteBatch.Draw(t_icon, pos, new Rectangle(152, 0, 48, 32), Color.White);
                     if (actStage == 21)
                         Helper.DrawWindowBottom1("この行動はまだ実装されていない！");
                     else if (actStage == 22)
@@ -1087,7 +1382,7 @@ namespace tohoSRPG
                         if (actStage == 0)
                             p.X = 23;
                         else
-                            p.X = 431;
+                            p.X = 441;
                         if (selectedAct == 0)
                             p.Y = 10;
                         else
@@ -1099,38 +1394,41 @@ namespace tohoSRPG
                     Helper.DrawStringWithShadow("戦闘開始", drawMapOrigin + new Vector2(-205, -2));
                     for (int i = 0; i < allyUnitGadget.Count; i++)
                     {
-                        Helper.DrawStringWithShadow(allyUnitGadget[i].unit.name, drawMapOrigin + new Vector2(-280, 50 + i * 50));
+                        Helper.DrawStringWithShadow(allyUnitGadget[i].unit.name, drawMapOrigin + new Vector2(-260, 50 + i * 50));
                     }
                     for (int i = 0; i < enemyUnitGadget.Count; i++)
                     {
-                        Helper.DrawStringWithShadow(enemyUnitGadget[i].unit.name, drawMapOrigin + new Vector2(425, 50 + i * 50));
+                        Helper.DrawStringWithShadow(enemyUnitGadget[i].unit.name, drawMapOrigin + new Vector2(440, 50 + i * 50));
                     }
-                    
                 }
                 if (actStage >= 2)
                 {
                     UnitGadget ug;
-                    int x1, x2;
+                    int x1, x2, x3, x4;
                     SpriteEffects se;
                     if (actStage == 2)
                     {
                         ug = allyUnitGadget[selectedAct - 1];
                         x1 = 0;
-                        x2 = 360;
+                        x2 = 320;
+                        x3 = 3;
+                        x4 = 211;
                         se = SpriteEffects.None;
                     }
                     else
                     {
                         ug = enemyUnitGadget[selectedAct - 1];
-                        x1 = 720 - 144 * 2;
-                        x2 = 120;
+                        x1 = 410;
+                        x2 = 10;
+                        x3 = 211;
+                        x4 = 3;
                         se = SpriteEffects.FlipHorizontally;
                     }
                     DrawUnit(ug, gameTime);
 
-                    spriteBatch.Draw(t_cursor, new Vector2(x1 + 10, 10), new Rectangle((int)ug.unit.type * 32, 72, 32, 32), Color.White);
+                    spriteBatch.Draw(t_icon, new Vector2(x1 + 10, 10), new Rectangle((int)ug.unit.type * 32, 72, 32, 32), Color.White);
                     if (ug.drive)
-                        spriteBatch.Draw(t_cursor, new Vector2(x1 + 26, 26), new Rectangle((int)ug.unit.type2 * 16, 104, 16, 16), Color.White);
+                        spriteBatch.Draw(t_icon, new Vector2(x1 + 26, 26), new Rectangle((int)ug.unit.type2 * 16, 104, 16, 16), Color.White);
                     Helper.DrawStringWithShadow(ug.unit.name, new Vector2(x1 + 52, 10));
                     Helper.DrawStringWithShadow("HP:", new Vector2(x1 + 10, 39));
                     str = ug.HP.ToString();
@@ -1148,17 +1446,39 @@ namespace tohoSRPG
                     str = ug.AP.ToString();
                     Helper.DrawStringWithShadow(str, new Vector2(x1 + 122 - font.MeasureString(str).X, 87));
 
+                    if (ug.symptonMinus.sympton > 0)
+                    {
+                        spriteBatch.Draw(t_icon, new Vector2(x1 + x3, 120), new Rectangle(0, 192 + 48 * ((int)ug.symptonMinus.sympton - 1), 96, 48), Color.White);
+                        Helper.DrawStringWithShadow(ug.symptonMinus.turn.ToString(), new Vector2(x1 + x3, 171));
+                    }
+                    if (ug.symptonPlus.sympton > 0)
+                    {
+                        spriteBatch.Draw(t_icon, new Vector2(x1 + x4, 120), new Rectangle(96, 192 + 48 * ((int)ug.symptonPlus.sympton - 1), 96, 48), Color.White);
+                        Helper.DrawStringWithShadow(ug.symptonPlus.turn.ToString(), new Vector2(x1 + x4, 171));
+                    }
+                    if (ug.trap.sympton > 0)
+                        spriteBatch.Draw(t_icon, new Vector2(x1 + x3, 429), new Rectangle(192, 192 + 48 * ((int)ug.trap.sympton - 1), 96, 48), Color.White);
+                    if (ug.stance >= 0)
+                    {
+                        if (ug.unit.acts[ug.stance].type == ActType.Guard)
+                            spriteBatch.Draw(t_icon, new Vector2(x1 + x4, 429), new Rectangle(192, 528, 96, 48), Color.White);
+                        else if (ug.unit.acts[ug.stance].type == ActType.LessGuard)
+                            spriteBatch.Draw(t_icon, new Vector2(x1 + x4, 429), new Rectangle(192, 576, 96, 48), Color.White);
+                        else if (ug.unit.acts[ug.stance].type == ActType.Counter)
+                            spriteBatch.Draw(t_icon, new Vector2(x1 + x4, 429), new Rectangle(192, 624, 96, 48), Color.White);
+                    }
+
                     for (int i = 0; i < 6; i++)
                     {
                         Act a = ug.unit.acts[i];
                         if (a != null)
                         {
-                            spriteBatch.Draw(t_cursor, new Vector2(x2, 40 + i * 70), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), Color.White);
+                            spriteBatch.Draw(t_icon, new Vector2(x2, 40 + i * 70), new Rectangle(GetIconFact(a) * 24, 48, 24, 24), Color.White);
                             Helper.DrawStringWithShadow(a.name, new Vector2(x2 + 40, 35 + i * 70));
                             Helper.DrawStringWithShadow(Helper.GetStringActType(a), new Vector2(x2 + 70, 65 + i * 70));
                         }
                         else
-                            spriteBatch.Draw(t_cursor, new Vector2(x2, 40 + i * 70), new Rectangle(4 * 24, 48, 24, 24), Color.White);
+                            spriteBatch.Draw(t_icon, new Vector2(x2, 40 + i * 70), new Rectangle(4 * 24, 48, 24, 24), Color.White);
                     }
                 }
                 #endregion
@@ -1205,11 +1525,15 @@ namespace tohoSRPG
 
         static void SetTurnOrder()
         {
-            SortedDictionary<int, UnitGadget> order = new SortedDictionary<int, UnitGadget>(new CaseInsensitiveReverseIntegerComparer());
+            SortedDictionary<float, UnitGadget> order = new SortedDictionary<float, UnitGadget>(new CaseInsensitiveReverseFloatComparer());
             foreach (UnitGadget ug in allUnitGadget)
             {
-                int d = Game.rand.Next(11) - 5;
-                order.Add(ug.Parameter.speed + d + (ug.leader ? 60 : 0), ug);
+                float d;
+                do
+                {
+                    d = ug.Parameter.speed + ((float)Game.rand.NextDouble() * 10 - 5) + (ug.leader ? 60 : 0);
+                } while (order.Keys.Contains(d));
+                order.Add(d, ug);
             }
             foreach (UnitGadget ug in order.Values)
             {
@@ -1286,7 +1610,7 @@ namespace tohoSRPG
                 }
                 else if (currentUnit.ff == FrendOfFoe.Ally)
                 {
-                    return 303;
+                    return 291;
                 }
                 else
                 {
@@ -1301,7 +1625,7 @@ namespace tohoSRPG
                 }
                 else if (actStage == 0 || actStage == 2)
                 {
-                    return 303;
+                    return 291;
                 }
                 else
                 {
@@ -1462,7 +1786,7 @@ namespace tohoSRPG
                 currentUnit.postion = p;
                 return lug;
             }
-            if (a.type == ActType.Guard || a.type == ActType.LessGuard || a.type == ActType.CoverCounter)
+            if (a.type == ActType.Guard || a.type == ActType.LessGuard || a.type == ActType.Counter)
                 lug.Add(currentUnit);
 
             if (((a.target == ActTarget.Enemy1 || a.target == ActTarget.EnemyAll) && currentUnit.ff == FrendOfFoe.Ally)
@@ -1471,6 +1795,8 @@ namespace tohoSRPG
             {
                 for (int i = 0; i < enemyUnitGadget.Count; i++)
                 {
+                    if (a.type == ActType.Revive && enemyUnitGadget[i].HP > 0)
+                        continue;
                     float d = Positon.Distance(unitCursor, enemyUnitGadget[i].postion);
                     if (d >= a.rangeMin && d <= a.rangeMax)
                         lug.Add(enemyUnitGadget[i]);
@@ -1482,6 +1808,8 @@ namespace tohoSRPG
             {
                 for (int i = 0; i < allyUnitGadget.Count; i++)
                 {
+                    if (a.type == ActType.Revive && allyUnitGadget[i].HP > 0)
+                        continue;
                     float d = Positon.Distance(unitCursor, allyUnitGadget[i].postion);
                     if (d >= a.rangeMin && d <= a.rangeMax)
                         lug.Add(allyUnitGadget[i]);
@@ -1507,10 +1835,74 @@ namespace tohoSRPG
                 + (mapcost ? mapCost[unitCursor.X, unitCursor.Y].cost : 0);
         }
 
+        static void PrintActSuccessRate()
+        {
+            Act a = currentAct;
+            List<UnitGadget> lug = GetActTarget();
+            MapTip tip = GetTip(currentUnit.postion);
+
+            int level = currentUnit.unit.level;
+            level += (currentUnit.level - level) / 2;
+
+            int success = a.success + (int)(level * 2 * a.proficiency);
+            if (a.TypeInt < 100)
+                success += currentUnit.Parameter.close;
+            else
+                success += currentUnit.Parameter.far;
+            success += (3 - (int)GetAffinity(currentUnit, unitCursor)) * 10;
+            if (unitCursor == currentUnit.postion && a.type == ActType.Shot)
+            {
+                foreach (Act act in currentUnit.unit.acts)
+                    if (act != null && (act.type == ActType.Scope || act.type == ActType.DualBoost))
+                        success += act.success;
+            }
+            if (a.TypeInt % 100 == 0 && currentUnit.IsType(Type.Technic))
+                success += currentUnit.SP / 4;
+            if (tip.effect.sympton == CrystalEffect.HitUp)
+                success += tip.effect.power;
+            if (currentUnit.symptonPlus.sympton == SymptonPlus.Concentrate)
+                success += currentUnit.symptonPlus.power;
+            if (currentUnit.symptonMinus.sympton == SymptonMinus.Distract)
+                success -= currentUnit.symptonMinus.power;
+
+            if (currentAct.IsTargetAll)
+            {
+            }
+            else
+            {
+                UnitGadget target = null;
+                for (int i = 0; i < lug.Count; i++)
+                    if (lug[i] == currentUnit ? targetCursor == unitCursor : targetCursor == lug[i].postion)
+                    {
+                        target = lug[i];
+                    }
+                if (target == null)
+                    return;
+
+                if (currentAct.TypeInt % 2 == 0)
+                {
+                    int elevel = target.unit.level;
+                    elevel += (target.level - elevel) / 2;
+
+                    int avoid = target.Parameter.avoid + elevel * 2;
+                    avoid += (3 - (int)GetAffinity(target, target.postion)) * 5;
+                    if (target.symptonPlus.sympton == SymptonPlus.Concentrate)
+                        avoid += target.symptonPlus.power;
+
+                    int hit = success - avoid;
+                    if (target.IsType(Type.Fortune) && currentAct.TypeInt % 100 == 0)
+                        hit = (int)(hit * 0.666f);
+                    Helper.DrawStringWithShadow(hit + "%", new Vector2(120, 200));
+                }
+                else
+                    Helper.DrawStringWithShadow(success + "%", new Vector2(120, 200));
+            }
+        }
+
         static void CalcAttackResult(UnitGadget target)
         {
             Act a = currentAct;
-            if (a.TypeInt >= 200 || a.TypeInt % 100 != 0)
+            if (a.TypeInt >= 200 || a.TypeInt % 2 == 1)
                 return;
 
             MapTip tip = GetTip(currentUnit.postion);
@@ -1519,6 +1911,7 @@ namespace tohoSRPG
             guard = false;
             damage = 0;
             force = 0;
+            sympTurn = 0;
 
             // 自分パラメータ補正
             // レベル
@@ -1531,7 +1924,7 @@ namespace tohoSRPG
             else
                 success += currentUnit.Parameter.far;
             success += (3 - (int)GetAffinity(currentUnit, currentUnit.postion)) * 10;
-            if (!moved)
+            if (a.TypeInt % 100 == 0 && !moved && a.type == ActType.Shot)
             {
                 foreach (Act act in currentUnit.unit.acts)
                     if (act != null && (act.type == ActType.Scope || act.type == ActType.DualBoost))
@@ -1547,9 +1940,9 @@ namespace tohoSRPG
                 success -= currentUnit.symptonMinus.power;
             // 威力
             int power = a.power;
-            if (a.TypeInt % 100 == 0 && a.IsHaveAbility(ActAbility.Rush))
+            if (a.IsHaveAbility(ActAbility.Rush))
                 power += currentUnit.Parameter.speed / 2;
-            if (moved)
+            if (a.TypeInt % 100 == 0 && moved && a.type == ActType.Grapple)
             {
                 foreach (Act act in currentUnit.unit.acts)
                     if (act != null && (act.type == ActType.Booster || act.type == ActType.DualBoost))
@@ -1566,7 +1959,7 @@ namespace tohoSRPG
             int avoid = target.Parameter.avoid + elevel * 2;
             avoid += (3 - (int)GetAffinity(target, target.postion)) * 5;
             if (target.symptonPlus.sympton == SymptonPlus.Concentrate)
-                avoid += target.symptonPlus.power;
+                avoid += target.symptonPlus.power / 2;
             // 防御
             int defence = target.Parameter.defence + elevel / 5;
 
@@ -1574,6 +1967,16 @@ namespace tohoSRPG
             if (target.dedodge || ((target.IsType(Type.Fortune) && Helper.GetProbability(success - avoid, 150))
                 || (!target.IsType(Type.Fortune) && Helper.GetProbability(success - avoid))))
                 hit = true;
+            if (a.TypeInt % 100 == 0)
+            {
+                if (currentUnit.trap.sympton == Trap.HitPromise)
+                {
+                    hit = true;
+                    currentUnit.trap.sympton = Trap.None;
+                }
+                if (target.symptonPlus.sympton == SymptonPlus.AbsoluteDodge)
+                    hit = false;
+            }
 
             // 防御判定
             if (!target.deguard && Helper.GetProbability(defence * 2))
@@ -1617,17 +2020,144 @@ namespace tohoSRPG
                     damage -= tip.effect.power;
                 if (a.IsHaveAbility(ActAbility.Diffuse))
                     damage = (int)(damage * GetRandomFact(0.5));
+
+                if (a.TypeInt % 100 == 0 && target.trap.sympton == Trap.MagicCharge)
+                {
+                    damage /= 2;
+                    target.trap.power--;
+                    if (target.trap.power <= 0)
+                        target.trap.sympton = Trap.None;
+                }
+
                 if (damage < 1)
                     damage = 1;
 
                 // ふっとび量計算
                 if (a.IsHaveAbility(ActAbility.Shock) || a.IsHaveAbility(ActAbility.Vacuum))
                     force = 1f * damage / 20;
+
+                // 症状計算
+                if (a.sympton > 0)
+                {
+                    sympTurn = (success - avoid) / 16;
+                    if (sympTurn > 12)
+                        sympTurn = 12;
+
+                    switch ((SymptonMinus)a.sympton)
+                    {
+                        case SymptonMinus.Slip:
+                            sympPower = damage / 2;
+                            break;
+                        case SymptonMinus.Distract:
+                            sympPower = damage * 2;
+                            break;
+                        case SymptonMinus.Restraint:
+                            sympPower = damage / 5;
+                            break;
+                        case SymptonMinus.Stop:
+                            sympPower = damage / 10 + (success - avoid) / 16;
+                            break;
+                        default:
+                            sympPower = power;
+                            break;
+                    }
+                }
+            }
+        }
+
+        static void CalcSupportResult()
+        {
+            Act a = currentAct;
+            if (a.TypeInt >= 200 || a.TypeInt % 2 == 0)
+                return;
+
+            MapTip tip = GetTip(currentUnit.postion);
+            hit = false;
+            critical = false;
+            guard = false;
+            damage = 0;
+            force = 0;
+            sympTurn = 0;
+
+            // パラメータ補正
+            // レベル
+            int level = currentUnit.unit.level;
+            level += (currentUnit.level - level) / 2;
+            // 成功
+            int success = a.success + (int)(level * 2 * a.proficiency);
+            if (a.TypeInt < 100)
+                success += currentUnit.Parameter.close;
+            else
+                success += currentUnit.Parameter.far;
+            success += (3 - (int)GetAffinity(currentUnit, currentUnit.postion)) * 10;
+            if (tip.effect.sympton == CrystalEffect.HitUp)
+                success += tip.effect.power;
+            if (currentUnit.symptonPlus.sympton == SymptonPlus.Concentrate)
+                success += currentUnit.symptonPlus.power;
+            if (currentUnit.symptonMinus.sympton == SymptonMinus.Distract)
+                success -= currentUnit.symptonMinus.power;
+            // 威力
+            int power = a.power;
+
+            // 成功判定
+            if (Helper.GetProbability(success))
+                hit = true;
+
+            if (hit)
+            {
+                sympTurn = success / 16;
+                if (sympTurn > 12)
+                    sympTurn = 12;
+
+                int tmp = 0;
+                switch (a.type)
+                {
+                    case ActType.AddPlusSympton:
+                        switch ((SymptonPlus)a.sympton)
+                        {
+                            case SymptonPlus.Heal:
+                            case SymptonPlus.Concentrate:
+                                tmp = success / 16;
+                                break;
+                            case SymptonPlus.Charge:
+                                tmp = success / 32;
+                                break;
+                        }
+                        break;
+                    default:
+                        tmp = success / 5;
+                        break;
+                }
+                tmp = (int)(tmp * GetRandomFact());
+                if (tmp < 0)
+                    tmp = 0;
+                damage = tmp + power;
+                sympPower = tmp + power;
             }
         }
 
         static void TurnEnd()
         {
+            if (actStage != 20)
+            {
+                if ((currentUnit.unit.IsHaveAbility(Ability.ActAgain) && actTimes == 0) ||
+                    (currentUnit.symptonPlus.sympton == SymptonPlus.ActAgain &&
+                    (actTimes == 0 || (currentUnit.unit.IsHaveAbility(Ability.ActAgain) && actTimes == 1))))
+                {
+                    actStage = 17;
+                    return;
+                }
+                if (actStage != 18 && actStage != 19 && currentUnit.drive)
+                {
+                    actStage = 18;
+                    return;
+                }
+                if (selectedAct == 0 && !moved && usingAP == 0)
+                {
+                    actStage = 20;
+                    return;
+                }
+            }
             if (!currentUnit.drive)
                 AddSP(currentUnit, currentUnit.AP - usingAP);
             currentUnit.AP = 0;
@@ -1765,11 +2295,11 @@ namespace tohoSRPG
         }
     }
 
-    class CaseInsensitiveReverseIntegerComparer : IComparer<int>
+    class CaseInsensitiveReverseFloatComparer : IComparer<float>
     {
-        public int Compare(int x, int y)
+        public int Compare(float x, float y)
         {
-            return (y - x);
+            return (int)Math.Round(y - x, MidpointRounding.AwayFromZero);
         }
     }
 }

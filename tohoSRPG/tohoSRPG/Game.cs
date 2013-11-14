@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -58,6 +59,10 @@ namespace tohoSRPG
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferWidth = 720;
             graphics.PreferredBackBufferHeight = 480;
+
+            //Form MyForm = (Form)Form.FromHandle(this.Window.Handle);
+            //MyForm.MaximizeBox = false;
+            //MyForm.MinimizeBox = false;
         }
 
         protected override void Initialize()
@@ -96,7 +101,7 @@ namespace tohoSRPG
         {
             if (StorageRequested == request.non && IsActive)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+                if (Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
                     this.Exit();
 
                 // 入力の更新

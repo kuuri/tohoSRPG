@@ -60,19 +60,19 @@ namespace tohoSRPG
         ClearMinusSympton = 7,
         Guard = 9,
         LessGuard = 11,
-        CoverCounter = 13,
+        Counter = 13,
         SPUp = 15,
         SetCrystal = 17,
         ClearCrystal = 19,
-        LevelDrain = 20,
-        Musoutensei = 21,
+        LevelDrain = 21,
+        Musoutensei = 23,
 
         Shot = 100,
         AddMinusSympton = 102,
         ClearPlusSympton = 103,
         SetTrap = 105,
         ClearTrap = 107,
-        SPDrain = 108,
+        SPDrain = 109,
 
         Booster = 201,
         Scope,
@@ -85,7 +85,7 @@ namespace tohoSRPG
     /// </summary>
     public enum ActAbility
     {
-        None, Hit, Fast, Rush, Penetrate, Diffuse, Shock, Vacuum, Absorb, Destroy, Heat, Cold, Thunder, Laser
+        None, Fast, Rush, Hit, Penetrate, Diffuse, Shock, Vacuum, Drain, AntiMinus, AntiPlus, Destroy, Sanctio, Heat, Cold, Thunder, Laser
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ namespace tohoSRPG
     /// </summary>
     public enum SymptonPlus
     {
-        None, Heal, Charge, Concentrate, Swift, AbsoluteDodge, ActAgain, PlusInvalid
+        None, Heal, Charge, Concentrate, Swift, AbsoluteDodge, ActAgain, Stigmata, PlusInvalid
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ namespace tohoSRPG
     /// </summary>
     public enum SymptonMinus
     {
-        None, Slip, Distract, Restraint, Stop, Confuse, Deguard, Dedodge, FixInside, FixOutside, MinusInvalid
+        None, Slip, Distract, Restraint, Stop, Confuse, Deguard, Dedodge, FixInside, FixOutside, CarvedSeal, MinusInvalid
     }
 
     /// <summary>
@@ -117,7 +117,7 @@ namespace tohoSRPG
     /// </summary>
     public enum Trap
     {
-        None, GrappleTrap, ShotTrap, AttackTrap, OnceClear, SPPlant, TrapClear
+        None, GrappleTrap, ShotTrap, AttackTrap, OnceClear, SPPlant, HitPromise, MagicCharge, TrapClear
     }
 
     /// <summary>
@@ -125,7 +125,7 @@ namespace tohoSRPG
     /// </summary>
     public enum CrystalEffect
     {
-        None, HPDamage, HPHeal, ForbidHeal, APUp, APDown, CostUp, HitUp, DamageUp, DamageDown, AffinityDown, ChangeTerrain
+        None, HPDamage, HPHeal, ForbidHeal, APUp, APDown, CostUp, HitUp, DamageUp, DamageDown, TimeStop, AffinityDown, ChangeTerrain
     }
 
     /// <summary>
@@ -134,6 +134,7 @@ namespace tohoSRPG
     public enum Ability
     {
         None,
+        ActAgain,
         Drive
     }
 

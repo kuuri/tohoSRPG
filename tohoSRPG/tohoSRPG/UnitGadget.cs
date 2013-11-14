@@ -26,6 +26,7 @@ namespace tohoSRPG
         public Condition<SymptonPlus> symptonPlus;
         public Condition<SymptonMinus> symptonMinus;
         public Condition<Trap> trap;
+        public int stance;
 
         public bool dedodge;
         public bool deguard;
@@ -49,11 +50,16 @@ namespace tohoSRPG
             symptonPlus = new Condition<SymptonPlus>(SymptonPlus.None, 0, 0);
             symptonMinus = new Condition<SymptonMinus>(SymptonMinus.None, 0, 0);
             trap = new Condition<Trap>(Trap.None, 0, 0);
+            stance = -1;
         }
 
         public int GetAP()
         {
-            return 16 + Parameter.speed / 10 + level / 5;
+            int ap = 16 + Parameter.speed / 10 + level / 5;
+            foreach (Act act in unit.acts)
+                if (act != null && (act.type == ActType.Charge))
+                    ap += act.power;
+            return ap;
         }
 
         public bool IsType(Type type)
@@ -70,10 +76,10 @@ namespace tohoSRPG
     struct Condition<T>
     {
         public T sympton;
-        public float turn;
+        public int turn;
         public int power;
 
-        public Condition(T sympton, float turn, int power)
+        public Condition(T sympton, int turn, int power)
         {
             this.sympton = sympton;
             this.turn = turn;

@@ -118,7 +118,6 @@ namespace tohoSRPG
             a = new Act();
             a.name = "封魔陣";
             a.type = ActType.Grapple;
-            a.sympton = (int)SymptonMinus.Restraint;
             a.proficiency = 1.5f;
             a.success = 75;
             a.power = 30;
@@ -356,7 +355,7 @@ namespace tohoSRPG
             a.type = ActType.AddPlusSympton;
             a.sympton = (int)SymptonPlus.Concentrate;
             a.proficiency = 2;
-            a.success = 27;
+            a.success = 6;
             a.power = 35;
             a.ap = 12;
             a.target = ActTarget.Ally1;
@@ -734,7 +733,7 @@ namespace tohoSRPG
 
             a = new Act();
             a.name = "ライフブラッド";
-            a.type = ActType.CoverCounter;
+            a.type = ActType.Counter;
             a.proficiency = 0.5f;
             a.success = 1;
             a.power = 41;

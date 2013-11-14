@@ -152,7 +152,7 @@ namespace tohoSRPG
                         str += "衝撃";
                     else if (a.IsHaveAbility(ActAbility.Vacuum))
                         str += "吸引";
-                    if (a.IsHaveAbility(ActAbility.Absorb))
+                    if (a.IsHaveAbility(ActAbility.Drain))
                         str += "吸収";
                     if (a.IsHaveAbility(ActAbility.Diffuse))
                         str += "拡散";
@@ -298,8 +298,8 @@ namespace tohoSRPG
                     return "防御";
                 case ActType.LessGuard:
                     return "未満防御";
-                case ActType.CoverCounter:
-                    return "援護反撃";
+                case ActType.Counter:
+                    return "反撃";
                 case ActType.SPUp:
                     return "SPアップ";
                 case ActType.SPDrain:

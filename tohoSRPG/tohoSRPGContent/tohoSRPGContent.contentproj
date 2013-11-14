@@ -103,8 +103,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="img\icon\cursor.png">
-      <Name>cursor</Name>
+    <Compile Include="img\icon\icon.png">
+      <Name>icon</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
