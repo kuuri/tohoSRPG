@@ -31,6 +31,8 @@ namespace tohoSRPG
         public bool dedodge;
         public bool deguard;
 
+        public float spChargeFact;
+
         public UnitGadget(FrendOfFoe ff, Unit unit, Positon pos, bool leader = false)
         {
             id = unit.id;
@@ -51,6 +53,11 @@ namespace tohoSRPG
             symptonMinus = new Condition<SymptonMinus>(SymptonMinus.None, 0, 0);
             trap = new Condition<Trap>(Trap.None, 0, 0);
             stance = -1;
+
+            dedodge = false;
+            deguard = false;
+
+            spChargeFact = 0;
         }
 
         public int GetAP()

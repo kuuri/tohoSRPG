@@ -75,6 +75,8 @@ namespace tohoSRPG
         public int rangeMin;
         public int rangeMax;
 
+        public int fact;
+
         public Act()
         {
             lastSpell = false;

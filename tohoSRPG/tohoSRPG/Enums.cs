@@ -63,7 +63,6 @@ namespace tohoSRPG
         Counter = 13,
         SPUp = 15,
         SetCrystal = 17,
-        ClearCrystal = 19,
         LevelDrain = 21,
         Musoutensei = 23,
 
@@ -101,7 +100,7 @@ namespace tohoSRPG
     /// </summary>
     public enum SymptonPlus
     {
-        None, Heal, Charge, Concentrate, Swift, AbsoluteDodge, ActAgain, Stigmata, PlusInvalid
+        None, Heal, Charge, Concentrate, Swift, AbsoluteDodge, ActAgain, Stigmata, Invalid
     }
 
     /// <summary>
@@ -109,7 +108,7 @@ namespace tohoSRPG
     /// </summary>
     public enum SymptonMinus
     {
-        None, Slip, Distract, Restraint, Stop, Confuse, Deguard, Dedodge, FixInside, FixOutside, CarvedSeal, MinusInvalid
+        None, Damage, Distract, Restraint, Stop, Confuse, Deguard, Dedodge, FixInside, FixOutside, CarvedSeal, Invalid
     }
 
     /// <summary>
@@ -122,10 +121,28 @@ namespace tohoSRPG
 
     /// <summary>
     /// 結晶効果
+    /// 0～9:その他
+    /// 10～19:プラス効果
+    /// 20～29:マイナス効果
     /// </summary>
     public enum CrystalEffect
     {
-        None, HPDamage, HPHeal, ForbidHeal, APUp, APDown, CostUp, HitUp, DamageUp, DamageDown, TimeStop, AffinityDown, ChangeTerrain
+        None = 0,
+        ChangeTerrain,
+        Invalid,
+
+        HPHeal = 10,
+        APUp,
+        HitUp,
+        DamageDown,
+
+        HPDamage = 20,
+        ForbidHeal,
+        APDown,
+        CostUp,
+        DamageUp,
+        TimeStop,
+        AffinityDown,
     }
 
     /// <summary>
@@ -134,6 +151,7 @@ namespace tohoSRPG
     public enum Ability
     {
         None,
+        SymptonClear,
         ActAgain,
         Drive
     }

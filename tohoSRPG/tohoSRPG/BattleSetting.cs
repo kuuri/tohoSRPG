@@ -36,9 +36,9 @@ namespace tohoSRPG
 
             BT.t_bg = content.Load<Texture2D>("img\\bg\\bg001");
 
-            BT.allyUnitGadget.Add(new UnitGadget(FF.Ally, BT.allyUnit[0], new Positon(2, 4), true));
+            BT.allyUnitGadget.Add(new UnitGadget(FF.Ally, BT.allyUnit[3], new Positon(2, 4), true));
             BT.allyUnitGadget.Add(new UnitGadget(FF.Ally, BT.allyUnit[1], new Positon(2, 2)));
-            BT.allyUnitGadget.Add(new UnitGadget(FF.Ally, BT.allyUnit[3], new Positon(2, 6)));
+            BT.allyUnitGadget.Add(new UnitGadget(FF.Ally, BT.allyUnit[0], new Positon(2, 6)));
             BT.allyUnitGadget.Add(new UnitGadget(FF.Ally, BT.allyUnit[2], new Positon(1, 3)));
             BT.allyUnitGadget.Add(new UnitGadget(FF.Ally, BT.allyUnit[4], new Positon(1, 5)));
 

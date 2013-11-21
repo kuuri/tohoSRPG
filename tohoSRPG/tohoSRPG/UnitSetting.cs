@@ -365,13 +365,15 @@ namespace tohoSRPG
 
             a = new Act();
             a.name = "払いの儀式";
-            a.type = ActType.ClearCrystal;
+            a.type = ActType.SetCrystal;
+            a.sympton = (int)CrystalEffect.Invalid;
             a.success = 38;
             a.power = 56;
             a.ap = 18;
             a.target = ActTarget.Field;
             a.rangeMin = 0;
             a.rangeMax = 2;
+            a.fact = '光';
             unit.acts[i++] = a;
 
             a = new Act();
@@ -457,6 +459,7 @@ namespace tohoSRPG
             a.target = ActTarget.Field;
             a.rangeMin = 0;
             a.rangeMax = 3;
+            a.fact = '氷';
             unit.acts[i++] = a;
 
             a = new Act();

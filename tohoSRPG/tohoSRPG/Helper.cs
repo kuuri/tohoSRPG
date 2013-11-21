@@ -174,7 +174,7 @@ namespace tohoSRPG
                         str += "攻撃";
                     switch ((SymptonMinus)a.sympton)
                     {
-                        case SymptonMinus.Slip:
+                        case SymptonMinus.Damage:
                             str += ":継続";
                             break;
                         case SymptonMinus.Distract:
@@ -227,7 +227,7 @@ namespace tohoSRPG
                 case ActType.AddMinusSympton:
                     switch ((SymptonMinus)a.sympton)
                     {
-                        case SymptonMinus.Slip:
+                        case SymptonMinus.Damage:
                             return str + "継続";
                         case SymptonMinus.Distract:
                             return str + "散漫";
@@ -290,10 +290,10 @@ namespace tohoSRPG
                             return str + "ダメージ減少";
                         case CrystalEffect.AffinityDown:
                             return str + "適正ダウン";
+                        case CrystalEffect.Invalid:
+                            return "結晶クリア";
                     }
                     break;
-                case ActType.ClearCrystal:
-                    return "結晶消去";
                 case ActType.Guard:
                     return "防御";
                 case ActType.LessGuard:
@@ -353,6 +353,32 @@ namespace tohoSRPG
         {
             switch (ce)
             {
+                case CrystalEffect.HPDamage:
+                    return "HPダメージ";
+                case CrystalEffect.HPHeal:
+                    return "HP回復";
+                case CrystalEffect.ForbidHeal:
+                    return "回復不能";
+                case CrystalEffect.APUp:
+                    return "APアップ";
+                case CrystalEffect.APDown:
+                    return "APダウン";
+                case CrystalEffect.CostUp:
+                    return "コスト増加";
+                case CrystalEffect.HitUp:
+                    return "成功アップ";
+                case CrystalEffect.DamageUp:
+                    return "ダメージ増加";
+                case CrystalEffect.DamageDown:
+                    return "ダメージ減少";
+                case CrystalEffect.TimeStop:
+                    return "時間停止";
+                case CrystalEffect.AffinityDown:
+                    return "適正ダウン";
+                case CrystalEffect.ChangeTerrain:
+                    return "地形変化";
+                case CrystalEffect.Invalid:
+                    return "結晶クリア";
                 case CrystalEffect.None:
                 default:
                     return "－－－－－－－－";
@@ -378,5 +404,14 @@ namespace tohoSRPG
             return d < fact;
         }
 
+        /// <summary>
+        /// ラジアン角度の極座標を取得する
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        public static Vector2 GetPolarCoord(float r, float a)
+        {
+            return r * new Vector2((float)Math.Cos(a), (float)Math.Sin(a));
+        }
     }
 }

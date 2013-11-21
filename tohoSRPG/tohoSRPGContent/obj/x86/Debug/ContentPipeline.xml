@@ -68,7 +68,7 @@
       <Time>2013-10-20T04:46:05.6266597+09:00</Time>
       <Dependency>
         <Key>font\AllCharacters.txt</Key>
-        <Value>2013-11-15T02:37:41.5513596+09:00</Value>
+        <Value>2013-11-21T07:00:00.3602268+09:00</Value>
       </Dependency>
     </Item>
     <Item>
@@ -177,7 +177,7 @@
       <Processor>TextureProcessor</Processor>
       <Options>None</Options>
       <Output>C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\tohoSRPG\bin\x86\Debug\Content\img\icon\icon.xnb</Output>
-      <Time>2013-11-15T04:16:24.6011387+09:00</Time>
+      <Time>2013-11-21T06:15:53.1058125+09:00</Time>
     </Item>
     <BuildSuccessful>true</BuildSuccessful>
     <Settings>
