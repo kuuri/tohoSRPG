@@ -58,5 +58,10 @@ namespace tohoSRPG
         {
             return new Vector2(value.X, value.Y);
         }
+
+        public static Positon Zero
+        {
+            get { return new Positon(0, 0); }
+        }
     }
 }

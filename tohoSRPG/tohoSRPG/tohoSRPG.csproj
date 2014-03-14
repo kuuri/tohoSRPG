@@ -16,7 +16,7 @@
     <XnaProfile>HiDef</XnaProfile>
     <XnaCrossPlatformGroupID>218dc4be-38b5-45d1-9e28-d6bb84fe07c5</XnaCrossPlatformGroupID>
     <XnaOutputType>Game</XnaOutputType>
-    <ApplicationIcon>Game.ico</ApplicationIcon>
+    <ApplicationIcon>TohoSRPG.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -108,20 +108,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BattleSetting.cs" />
+    <Compile Include="Ability.cs" />
+    <Compile Include="ConfrontScene.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="InputManager.cs" />
+    <Compile Include="MenuScene.cs" />
     <Compile Include="Positon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Game.cs" />
+    <Compile Include="GameBody.cs" />
     <Compile Include="BattleScene.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="UnitGadget.cs" />
     <Compile Include="UnitSetting.cs" />
+    <Compile Include="WorldScene.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Game.ico" />
+    <Content Include="TohoSRPG.ico" />
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>

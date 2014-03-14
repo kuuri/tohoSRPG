@@ -26,9 +26,19 @@ namespace tohoSRPG
         {
             public int speed;
             public int avoid;
-            public int defence;
+            public int defense;
             public int close;
             public int far;
+
+            public static Parameter operator +(Parameter value1, UnitGadget.UpParameter value2)
+            {
+                Parameter result = value1;
+                result.speed += value2.speed;
+                result.close += value2.close;
+                result.far += value2.far;
+
+                return result;
+            }
         }
         public Parameter normalPar;
         public Parameter drivePar;
@@ -45,6 +55,38 @@ namespace tohoSRPG
             affinity = new Affinity[Enum.GetNames(typeof(Terrain)).Length - 1];
             ability = new List<Ability>();
             artifact = new Artifact[2];
+        }
+
+        public void DrawBattle(SpriteBatch sb, Vector2 pos, Color color, bool reverse)
+        {
+            if (!reverse)
+                sb.Draw(t_battle, pos, null, color, 0, t_battle_origin, 2, SpriteEffects.None, 0);
+            else
+                sb.Draw(t_battle, pos, null, color, 0, new Vector2(t_battle.Width - t_battle_origin.X, t_battle_origin.Y), 2, SpriteEffects.FlipHorizontally, 0);
+        }
+        
+        public void DrawBattle(SpriteBatch sb, Vector2 pos, Color color, float scale, bool reverse)
+        {
+            Rectangle rect = new Rectangle((int)pos.X, (int)(pos.Y),
+                t_battle.Width * 2, (int)(scale * t_battle.Height * 2));
+
+            if (!reverse)
+                sb.Draw(t_battle, rect, null, color, 0, t_battle_origin, SpriteEffects.None, 0);
+            else
+                sb.Draw(t_battle, rect, null, color, 0, new Vector2(t_battle.Width - t_battle_origin.X, t_battle_origin.Y), SpriteEffects.FlipHorizontally, 0);
+        }
+
+        public int GetAP(bool drive)
+        {
+            int ap = 16;
+            if (!drive)
+                ap += normalPar.speed / 10 + level / 5;
+            else
+                ap += drivePar.speed / 10 + level / 5;
+            foreach (Act act in acts)
+                if (act != null && (act.type == ActType.Charge))
+                    ap += act.power;
+            return ap;
         }
 
         public bool IsHaveAbility(Ability a)
@@ -66,9 +108,9 @@ namespace tohoSRPG
         public ActAbility ability1;
         public ActAbility ability2;
         public int sympton;
-        public float proficiency;
         public int success;
         public int power;
+        public int count;
         public int ap;
         public int sp;
         public ActTarget target;
@@ -83,7 +125,8 @@ namespace tohoSRPG
             ability1 = ActAbility.None;
             ability2 = ActAbility.None;
             sympton = 0;
-            proficiency = 1;
+            count = 0;
+            ap = 12;
             sp = 0;
         }
 
@@ -92,9 +135,40 @@ namespace tohoSRPG
             return ability1 == ability || ability2 == ability;
         }
 
+        /// <summary>
+        /// 貫通効果
+        /// </summary>
+        public bool IsPenetrate
+        {
+            get
+            {
+                return IsHaveAbility(ActAbility.Penetrate) || IsHaveAbility(ActAbility.Thunder)
+                    || IsHaveAbility(ActAbility.Assassin) || IsHaveAbility(ActAbility.Whole) || IsHaveAbility(ActAbility.Revenge)
+                    || IsHaveAbility(ActAbility.Sacrifice) || IsHaveAbility(ActAbility.Destroy) || IsHaveAbility(ActAbility.Sanctio);
+            }
+        }
+
+        /// <summary>
+        /// 上限解除効果
+        /// </summary>
+        public bool IsBreakthrough
+        {
+            get
+            {
+                return IsHaveAbility(ActAbility.Rush) || IsHaveAbility(ActAbility.Sacrifice)
+                    || IsHaveAbility(ActAbility.Destroy) || IsHaveAbility(ActAbility.Sanctio)
+                    || IsHaveAbility(ActAbility.Thunder);
+            }
+        }
+
         public int TypeInt
         {
             get { return (int)type; }
+        }
+
+        public bool IsLimited
+        {
+            get { return count > 0; }
         }
 
         public bool IsSpell
@@ -107,9 +181,29 @@ namespace tohoSRPG
             get { return target == ActTarget.Equip; }
         }
 
+        public bool IsCover
+        {
+            get { return type == ActType.Guard || type == ActType.LessGuard || type == ActType.Utsusemi; }
+        }
+
+        public bool IsStance
+        {
+            get { return type == ActType.Counter || type == ActType.BarrierDefense || type == ActType.BarrierSpirit; }
+        }
+
+        public bool IsActiveDefense
+        {
+            get { return type == ActType.Guard || type == ActType.LessGuard || type == ActType.Counter || type == ActType.BarrierDefense || type == ActType.BarrierSpirit; }
+        }
+
+        public bool IsActiveDodge
+        {
+            get { return type == ActType.Utsusemi; }
+        }
+
         public bool IsTargetAll
         {
-            get { return target == ActTarget.AllyAll || target == ActTarget.EnemyAll; }
+            get { return target == ActTarget.AllyAll || target == ActTarget.EnemyAll || target == ActTarget.All; }
         }
     }
 }

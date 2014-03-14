@@ -5,12 +5,17 @@ using System.Text;
 
 namespace tohoSRPG
 {
+    public enum Scene
+    {
+        None, Title, World, Talk, Confront, Battle, Menu
+    }
+
     /// <summary>
     /// 地形
     /// </summary>
     public enum Terrain
     {
-        Plain, Forest, Mountain, Waterside, Indoor, Red_hot, Sanctuary, Miasma, Banned
+        Plain, Sanctuary, Waterside, Mountain, Forest, Miasma, Red_hot, Indoor, Crystal, Banned
     }
 
     /// <summary>
@@ -18,7 +23,7 @@ namespace tohoSRPG
     /// </summary>
     public enum Affinity
     {
-        Best, Good, Normal, Bad
+        Bad, Normal, Good, VeryGood
     }
 
     /// <summary>
@@ -38,45 +43,53 @@ namespace tohoSRPG
     }
 
     /// <summary>
-    /// ユニットの種類
-    /// </summary>
-    public enum CharaID
-    {
-        Reimu, Marisa, Sanae, Chrino, Oku, Zero, Else
-    }
-
-    /// <summary>
     /// 行動の効果
     /// 0～99:近接 100～199:遠隔 200～:装備
     /// %100 = 0:攻撃
-    /// %2 = 0:相手に回避される 1:相手に回避されない
     /// </summary>
     public enum ActType
     {
         Grapple = 0,
-        Heal = 1,
-        Revive = 3,
-        AddPlusSympton = 5,
-        ClearMinusSympton = 7,
-        Guard = 9,
-        LessGuard = 11,
-        Counter = 13,
-        SPUp = 15,
-        SetCrystal = 17,
-        LevelDrain = 21,
-        Musoutensei = 23,
+        Heal,
+        Heal2,
+        Revive,
+        Revive2,
+        AddPlusSympton,
+        ClearMinusSympton,
+        Guard,
+        LessGuard,
+        SPUp,
+        SetCrystal,
+        SearchEnemy,
+        Hide,
+        UpSpeed,
+        UpClose,
+        UpFar,
+        UpReact,
+        LevelDrain,
+        CrystalDrain,
+        Musoutensei,
 
         Shot = 100,
-        AddMinusSympton = 102,
-        ClearPlusSympton = 103,
-        SetTrap = 105,
-        ClearTrap = 107,
-        SPDrain = 109,
+        CrystalSubsided,
+        AddMinusSympton,
+        AddDoubleSympton,
+        ClearPlusSympton,
+        Utsusemi,
+        Counter,
+        BarrierDefense,
+        BarrierSpirit,
+        SetTrap,
+        ClearTrap,
+        SPDrain,
+        Warp,
+        ClearParameter,
 
         Booster = 201,
         Scope,
         DualBoost,
-        Charge
+        Charge,
+        MoveAssist
     }
 
     /// <summary>
@@ -84,7 +97,36 @@ namespace tohoSRPG
     /// </summary>
     public enum ActAbility
     {
-        None, Fast, Rush, Hit, Penetrate, Diffuse, Shock, Vacuum, Drain, AntiMinus, AntiPlus, Destroy, Sanctio, Heat, Cold, Thunder, Laser
+        None,
+        Fast,
+        Rush,
+        Hit,
+        Penetrate,
+        Diffuse,
+        Shock,
+        Vacuum,
+        Geographic,
+        Proficient,
+        Drain,
+        Spirit,
+        Erosion,
+        AntiMinus,
+        AntiPlus,
+        AntiHuman,
+        AntiMonster,
+        Summon,
+        Repeat,
+        Time,
+        Assassin,
+        Whole,
+        Revenge,
+        Sacrifice,
+        Destroy,
+        Sanctio,
+        Heat,
+        Cold,
+        Thunder,
+        Laser
     }
 
     /// <summary>
@@ -92,7 +134,7 @@ namespace tohoSRPG
     /// </summary>
     public enum ActTarget
     {
-        Ally1, AllyAll, Enemy1, EnemyAll, AllyEnemy1, Field, Space, Equip
+        Ally1, AllyAll, Enemy1, EnemyAll, AllyEnemy1, All, Field, Space, Equip
     }
 
     /// <summary>
@@ -100,7 +142,7 @@ namespace tohoSRPG
     /// </summary>
     public enum SymptonPlus
     {
-        None, Heal, Charge, Concentrate, Swift, AbsoluteDodge, ActAgain, Stigmata, Invalid
+        None, Heal, Charge, Concentrate, Swift, Musoutensei, ActAgain, Stigmata, Invalid
     }
 
     /// <summary>
@@ -108,7 +150,7 @@ namespace tohoSRPG
     /// </summary>
     public enum SymptonMinus
     {
-        None, Damage, Distract, Restraint, Stop, Confuse, Deguard, Dedodge, FixInside, FixOutside, CarvedSeal, Invalid
+        None, Damage, Distract, Restraint, Stop, Confuse, Deguard, Dedodge, FixInside, FixOutside, CarvedSeal, Invalid, Stigmata
     }
 
     /// <summary>
@@ -121,39 +163,23 @@ namespace tohoSRPG
 
     /// <summary>
     /// 結晶効果
-    /// 0～9:その他
-    /// 10～19:プラス効果
-    /// 20～29:マイナス効果
     /// </summary>
     public enum CrystalEffect
     {
-        None = 0,
-        ChangeTerrain,
-        Invalid,
-
-        HPHeal = 10,
-        APUp,
-        HitUp,
-        DamageDown,
-
-        HPDamage = 20,
-        ForbidHeal,
-        APDown,
-        CostUp,
-        DamageUp,
-        TimeStop,
-        AffinityDown,
-    }
-
-    /// <summary>
-    /// アビリティ
-    /// </summary>
-    public enum Ability
-    {
         None,
-        SymptonClear,
-        ActAgain,
-        Drive
+        HPHeal,
+        HPDamage,
+        APUp,
+        APDown,
+        HitUp,
+        CostUp,
+        Suppression,
+        AffinityDown,
+        AffinityReverse,
+        SympInvalid,
+        DamageFix,
+        TimeStop,
+        ChangeTerrain,
     }
 
     /// <summary>
