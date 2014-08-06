@@ -26,7 +26,6 @@ namespace tohoSRPG
         static int select1, select2;
         static int selectedUnit;
 
-
         public static void Init(GraphicsDevice g, SpriteBatch s, ContentManager c)
         {
             graphics = g;

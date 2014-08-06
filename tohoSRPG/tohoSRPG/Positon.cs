@@ -36,6 +36,15 @@ namespace tohoSRPG
             return result;
         }
 
+        public static Positon operator -(Positon value)
+        {
+            Positon result;
+            result.X = -value.X;
+            result.Y = -value.Y;
+
+            return result;
+        }
+
         public static bool operator ==(Positon value1, Positon value2)
         {
             return value1.X == value2.X && value1.Y == value2.Y;

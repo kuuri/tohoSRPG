@@ -17,4 +17,3 @@ C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\FontPipeline\bin\x86\Debug\Cha
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\FontPipeline\bin\x86\Debug\CharacterPipeline.pdb
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\FontPipeline\obj\x86\Debug\CharacterPipeline.dll
 C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\FontPipeline\obj\x86\Debug\CharacterPipeline.pdb
-C:\Users\Lutyens\Desktop\開発\tohoSRPG\tohoSRPG\FontPipeline\obj\x86\Debug\CharacterPipeline.csprojResolveAssemblyReference.cache

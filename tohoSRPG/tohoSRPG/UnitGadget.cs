@@ -26,8 +26,6 @@ namespace tohoSRPG
         public int DP;
         public int AP;
 
-        public int crystalErosion;
-
         public int[] actCount;
 
         public Condition<SymptonPlus> symptonPlus;
@@ -42,6 +40,8 @@ namespace tohoSRPG
             public int speed;
             public int close;
             public int far;
+            public int attack;
+            public int defense;
 
             public void AddSearch(int value)
             {
@@ -81,6 +81,20 @@ namespace tohoSRPG
                 if (far > 128)
                     far = 128;
             }
+
+            public void AddAttack(int value)
+            {
+                attack += value;
+                if (attack > 64)
+                    attack = 64;
+            }
+
+            public void AddDefense(int value)
+            {
+                defense += value;
+                if (defense > 64)
+                    defense = 64;
+            }
         }
         public UpParameter upParameter;
 
@@ -106,11 +120,11 @@ namespace tohoSRPG
             SP = 160;
             DPmax = 160;
             DP = 0;
-            crystalErosion = 0;
 
             actCount = new int[unit.acts.Length];
             for (int i = 0; i < unit.acts.Length; i++)
-                actCount[i] = unit.acts[i].count;
+                if (unit.acts[i] != null)
+                    actCount[i] = unit.acts[i].count;
 
             symptonPlus = new Condition<SymptonPlus>(SymptonPlus.None, 0, 0);
             symptonMinus = new Condition<SymptonMinus>(SymptonMinus.None, 0, 0);
@@ -134,7 +148,7 @@ namespace tohoSRPG
             return ap;
         }
 
-        public bool IsType(Type type)
+        public bool IsType(UnitType type)
         {
             return unit.type == type || (drive ? unit.type2 == type : false);
         }
@@ -163,7 +177,7 @@ namespace tohoSRPG
             return false;
         }
 
-        public bool IsCrystalEffectInvalid(CrystalEffect effect)
+        public bool IsFieldEffectInvalid(FieldEffect effect)
         {
             return false;
         }
@@ -172,8 +186,24 @@ namespace tohoSRPG
         {
             get
             {
-                return (drive ? unit.drivePar : unit.normalPar) + upParameter;
+                Unit.Parameter par = drive ? unit.drivePar : unit.normalPar;
+                return par + upParameter;
             }
+        }
+
+        public Act[] Acts
+        {
+            get { return unit.acts; }
+        }
+
+        public int ZOCpower
+        {
+            get { return 1; }
+        }
+
+        public int ZOCrange
+        {
+            get { return 1; }
         }
 
         public bool Dedodge

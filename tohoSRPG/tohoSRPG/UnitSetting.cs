@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -22,8 +23,8 @@ namespace tohoSRPG
         Nazrin, Kogasa, Ichirin, Murasa, Syou, Hijiri, Nue,
         Kyouko, Yoshika, Seiga, Toziko, Futo, Miko, Mamizou,
         Wakasagi, Sekibanki, Kagerou, Benben, Yatsuhashi, Seija, Shinmyoumaru, Raiko,
-        Zero, Aila, Tetra, Riml, Lana,
-        Kecak, Baldr, Zeo, Inis, Balserga, Parawee,
+        Riml, Zero, Lana,
+        Parawee, Balserga, Farraha, Kecak, Karahaiya, Alfes,
         Else
     }
 
@@ -38,36 +39,129 @@ namespace tohoSRPG
 
         public static Unit SetUnit(CharaID chara, int level)
         {
-            switch (chara)
-            {
-                case CharaID.Reimu:
-                    return SetReimu(level);
-                case CharaID.Marisa:
-                    return SetMarisa(level);
-                case CharaID.Sanae:
-                    return SetSanae(level);
-                case CharaID.Cirno:
-                    return SetCirno(level);
-                case CharaID.Meirin:
-                    return SetMeirin(level);
-                case CharaID.Flandre:
-                    return SetFlandre(level);
-                case CharaID.Udonge:
-                    return SetUdonge(level);
-                case CharaID.Aya:
-                    return SetAya(level);
-                case CharaID.Rin:
-                    return SetRin(level);
-                case CharaID.Oku:
-                    return SetOku(level);
-                case CharaID.Kokoro:
-                    return SetKokoro(level);
-                case CharaID.Zero:
-                    return SetZero(level);
-                case CharaID.Else:
-                default:
-                    return null;
-            }
+            string name = "Set" + chara.ToString();
+            MethodInfo mi = typeof(UnitSetting).GetMethod(name, BindingFlags.NonPublic | BindingFlags.Static);
+            return (Unit)mi.Invoke(null, new object[] {level});
+        }
+
+        static Unit SetRiml(int level)
+        {
+            Unit unit = new Unit(CharaID.Riml);
+            unit.name = "リムル・ストレイジ";
+            unit.nickname = "リムル";
+            unit.t_battle = content.Load<Texture2D>("img\\battle\\riml");
+            unit.t_battle_origin = new Vector2(128, 250);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\riml");
+
+            unit.type = UnitType.Technic;
+            unit.type2 = UnitType.Apparition;
+
+            unit.level = level;
+
+            unit.pHP = 180;
+
+            unit.normalPar.speed = 26;
+            unit.normalPar.avoid = 35;
+            unit.normalPar.defense = 35;
+            unit.normalPar.close = 18;
+            unit.normalPar.far = 18;
+
+            unit.drivePar.speed = 55;
+            unit.drivePar.avoid = 52;
+            unit.drivePar.defense = 52;
+            unit.drivePar.close = 44;
+            unit.drivePar.far = 44;
+
+            unit.affinity[(int)Terrain.Plain] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Forest] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Mountain] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Waterside] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Indoor] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Red_hot] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Sanctuary] = Affinity.VeryGood;
+            unit.affinity[(int)Terrain.Miasma] = Affinity.VeryGood;
+
+            #region 行動
+            Act a;
+            int i = 0;
+
+            a = new Act();
+            a.name = "フォークロア";
+            a.type = ActType.MoveAssist;
+            a.success = 0;
+            a.power = 4;
+            a.ap = 0;
+            a.target = ActTarget.Equip;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "トラディション";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.AntiMinus;
+            a.success = 42;
+            a.power = 8;
+            a.ap = 6;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "レジェンダリー";
+            a.type = ActType.Shot;
+            a.ability1 = ActAbility.AntiPlus;
+            a.success = 42;
+            a.power = 8;
+            a.ap = 6;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 3;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "ハーモナイズ";
+            a.type = ActType.SetField;
+            a.sympton = (int)FieldEffect.APUp;
+            a.success = 46;
+            a.power = 12;
+            a.count = 1;
+            a.target = ActTarget.Field;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "キルクイトス";
+            a.type = ActType.AddPlusSympton;
+            a.sympton = (int)SymptonPlus.ActAgain;
+            a.success = 0;
+            a.power = 2;
+            a.ap = 25;
+            a.target = ActTarget.Ally1;
+            a.rangeMin = 2;
+            a.rangeMax = 3;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "ルナプレーナ";
+            a.lastSpell = true;
+            a.type = ActType.AddDoubleSympton;
+            a.success = 66;
+            a.power = 0;
+            a.ap = 24;
+            a.sp = 100;
+            a.target = ActTarget.EnemyAll;
+            a.rangeMin = 1;
+            a.rangeMax = 5;
+            unit.acts[i++] = a;
+
+            #endregion
+
+            unit.ability.Add(Ability.Drive);
+
+            return unit;
         }
 
         static Unit SetReimu(int level)
@@ -76,11 +170,11 @@ namespace tohoSRPG
             unit.name = "博麗霊夢";
             unit.nickname = "霊夢";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\reimu"); 
-            unit.t_battle_origin = new Vector2(64, 123);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\reimu");
+            unit.t_battle_origin = new Vector2(128, 246);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\reimu");
 
-            unit.type = Type.Fortune;
-            unit.type2 = Type.Power;
+            unit.type = UnitType.Fortune;
+            unit.type2 = UnitType.Power;
 
             unit.level = level;
 
@@ -197,11 +291,11 @@ namespace tohoSRPG
             unit.name = "霧雨魔理沙";
             unit.nickname = "魔理沙";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\marisa"); 
-            unit.t_battle_origin = new Vector2(64, 128);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\marisa");
+            unit.t_battle_origin = new Vector2(128, 256);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\marisa");
 
-            unit.type = Type.Intelligence;
-            unit.type2 = Type.Power;
+            unit.type = UnitType.Intelligence;
+            unit.type2 = UnitType.Power;
 
             unit.level = level;
 
@@ -315,135 +409,17 @@ namespace tohoSRPG
             return unit;
         }
 
-        static Unit SetSanae(int level)
-        {
-            Unit unit = new Unit(CharaID.Sanae);
-            unit.name = "東風谷早苗";
-            unit.nickname = "早苗";
-            unit.t_battle = content.Load<Texture2D>("img\\battle\\sanae");
-            unit.t_battle_origin = new Vector2(64, 121);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\sanae");
-
-            unit.type = Type.Guard;
-            unit.type2 = Type.Fortune;
-
-            unit.level = level;
-
-            unit.pHP = 185;
-
-            unit.normalPar.speed = 24;
-            unit.normalPar.avoid = 22;
-            unit.normalPar.defense = 46;
-            unit.normalPar.close = 14;
-            unit.normalPar.far = 13;
-
-            unit.drivePar.speed = 30;
-            unit.drivePar.avoid = 43;
-            unit.drivePar.defense = 81;
-            unit.drivePar.close = 47;
-            unit.drivePar.far = 45;
-
-            unit.affinity[(int)Terrain.Plain] = Affinity.Good;
-            unit.affinity[(int)Terrain.Forest] = Affinity.Normal;
-            unit.affinity[(int)Terrain.Mountain] = Affinity.VeryGood;
-            unit.affinity[(int)Terrain.Waterside] = Affinity.Normal;
-            unit.affinity[(int)Terrain.Indoor] = Affinity.Good;
-            unit.affinity[(int)Terrain.Red_hot] = Affinity.Bad;
-            unit.affinity[(int)Terrain.Sanctuary] = Affinity.Good;
-            unit.affinity[(int)Terrain.Miasma] = Affinity.Bad;
-
-            #region 行動
-            Act a;
-            int i = 0;
-
-            a = new Act();
-            a.name = "集中の奇跡";
-            a.type = ActType.SearchEnemy;
-            a.success = 38;
-            a.power = 37;
-            a.count = 4;
-            a.target = ActTarget.AllyAll;
-            a.rangeMin = 0;
-            a.rangeMax = 4;
-            unit.acts[i++] = a;
-
-            a = new Act();
-            a.name = "回復の奇跡";
-            a.type = ActType.Heal;
-            a.success = 38;
-            a.power = 36;
-            a.ap = 15;
-            a.target = ActTarget.Ally1;
-            a.rangeMin = 0;
-            a.rangeMax = 5;
-            unit.acts[i++] = a;
-
-            a = new Act();
-            a.name = "治療の奇跡";
-            a.type = ActType.ClearMinusSympton;
-            a.success = 17;
-            a.power = 42;
-            a.ap = 16;
-            a.target = ActTarget.AllyEnemy1;
-            a.rangeMin = 0;
-            a.rangeMax = 4;
-            unit.acts[i++] = a;
-
-            a = new Act();
-            a.name = "払いの儀式";
-            a.type = ActType.SetCrystal;
-            a.sympton = (int)CrystalEffect.SympInvalid;
-            a.success = 12;
-            a.power = 0;
-            a.ap = 18;
-            a.target = ActTarget.Field;
-            a.rangeMin = 0;
-            a.rangeMax = 0;
-            a.fact = '光';
-            unit.acts[i++] = a;
-
-            a = new Act();
-            a.name = "ミラクルフルーツ";
-            a.type = ActType.Heal2;
-            a.success = 54;
-            a.power = 97;
-            a.ap = 20;
-            a.sp = 100;
-            a.target = ActTarget.AllyAll;
-            a.rangeMin = 0;
-            a.rangeMax = 4;
-            unit.acts[i++] = a;
-
-            a = new Act();
-            a.name = "グレイソーマタージ";
-            a.lastSpell = true;
-            a.type = ActType.SetCrystal;
-            a.sympton = (int)CrystalEffect.DamageFix;
-            a.success = 52;
-            a.power = 60;
-            a.ap = 20;
-            a.sp = 40;
-            a.target = ActTarget.Field;
-            a.rangeMin = 0;
-            a.rangeMax = 3;
-            unit.acts[i++] = a;
-
-            #endregion
-
-            return unit;
-        }
-
         static Unit SetCirno(int level)
         {
             Unit unit = new Unit(CharaID.Cirno);
             unit.name = "チルノ";
             unit.nickname = "チルノ";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\cirno");
-            unit.t_battle_origin = new Vector2(72, 114);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\cirno");
+            unit.t_battle_origin = new Vector2(144, 228);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\cirno");
 
-            unit.type = Type.Apparition;
-            unit.type2 = Type.Power;
+            unit.type = UnitType.Apparition;
+            unit.type2 = UnitType.Power;
 
             unit.level = level;
 
@@ -476,8 +452,8 @@ namespace tohoSRPG
 
             a = new Act();
             a.name = "アイスフィールド";
-            a.type = ActType.SetCrystal;
-            a.sympton = (int)CrystalEffect.CostUp;
+            a.type = ActType.SetField;
+            a.sympton = (int)FieldEffect.CostUp;
             a.success = 11;
             a.power = 7;
             a.count = 2;
@@ -568,11 +544,11 @@ namespace tohoSRPG
             unit.name = "紅美鈴";
             unit.nickname = "美鈴";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\meirin");
-            unit.t_battle_origin = new Vector2(58, 126);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\meirin");
+            unit.t_battle_origin = new Vector2(116, 252);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\meirin");
 
-            unit.type = Type.Guard;
-            unit.type2 = Type.Technic;
+            unit.type = UnitType.Guard;
+            unit.type2 = UnitType.Technic;
 
             unit.level = level;
 
@@ -680,17 +656,264 @@ namespace tohoSRPG
             return unit;
         }
 
+        static Unit SetSakuya(int level)
+        {
+            Unit unit = new Unit(CharaID.Sakuya);
+            unit.name = "十六夜咲夜";
+            unit.nickname = "咲夜";
+            unit.t_battle = content.Load<Texture2D>("img\\battle\\sakuya");
+            unit.t_battle_origin = new Vector2(118, 250);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\sakuya");
+
+            unit.type = UnitType.Technic;
+            unit.type2 = UnitType.Apparition;
+
+            unit.level = level;
+
+            unit.pHP = 165;
+
+            unit.normalPar.speed = 36;
+            unit.normalPar.avoid = 52;
+            unit.normalPar.defense = 33;
+            unit.normalPar.close = 10;
+            unit.normalPar.far = 15;
+
+            unit.drivePar.speed = 53;
+            unit.drivePar.avoid = 74;
+            unit.drivePar.defense = 38;
+            unit.drivePar.close = 36;
+            unit.drivePar.far = 47;
+
+            unit.affinity[(int)Terrain.Plain] = Affinity.Good;
+            unit.affinity[(int)Terrain.Forest] = Affinity.Good;
+            unit.affinity[(int)Terrain.Mountain] = Affinity.Good;
+            unit.affinity[(int)Terrain.Waterside] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Indoor] = Affinity.VeryGood;
+            unit.affinity[(int)Terrain.Red_hot] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Sanctuary] = Affinity.Good;
+            unit.affinity[(int)Terrain.Miasma] = Affinity.Bad;
+
+            #region 行動
+            Act a;
+            int i = 0;
+
+            a = new Act();
+            a.name = "メイドマジック";
+            a.type = ActType.SetTrap;
+            a.sympton = (int)Trap.GrappleTrap;
+            a.success = 45;
+            a.power = 40;
+            a.count = 3;
+            a.target = ActTarget.Ally1;
+            a.rangeMin = 0;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "ミスディレクション";
+            a.type = ActType.Shot;
+            a.ability1 = ActAbility.Diffuse;
+            a.success = 68;
+            a.power = 5;
+            a.ap = 2;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 2;
+            a.rangeMax = 3;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "マジックスターソード";
+            a.type = ActType.Shot;
+            a.ability1 = ActAbility.Fast;
+            a.success = 38;
+            a.power = 21;
+            a.ap = 5;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 3;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "殺人ドール";
+            a.type = ActType.Shot;
+            a.ability1 = ActAbility.Fast;
+            a.success = 75;
+            a.power = 56;
+            a.ap = 20;
+            a.sp = 50;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 2;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "ソウルスカルプチュア";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Assassin;
+            a.sympton = (int)SymptonMinus.Damage;
+            a.success = 99;
+            a.power = 78;
+            a.ap = 20;
+            a.sp = 80;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "咲夜の世界";
+            a.lastSpell = true;
+            a.type = ActType.TimeStop;
+            a.success = 2;
+            a.power = 12;
+            a.ap = 0;
+            a.sp = 100;
+            a.target = ActTarget.Field;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            #endregion
+
+            return unit;
+        }
+
+        static Unit SetRemilia(int level)
+        {
+            Unit unit = new Unit(CharaID.Remilia);
+            unit.name = "レミリア・スカーレット";
+            unit.nickname = "レミリア";
+            unit.t_battle = content.Load<Texture2D>("img\\battle\\remilia");
+            unit.t_battle_origin = new Vector2(110, 240);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\remilia");
+
+            unit.type = UnitType.Power;
+            unit.type2 = UnitType.Technic;
+
+            unit.level = level;
+
+            unit.pHP = 275;
+
+            unit.normalPar.speed = 66;
+            unit.normalPar.avoid = 45;
+            unit.normalPar.defense = 36;
+            unit.normalPar.close = 25;
+            unit.normalPar.far = 17;
+
+            unit.drivePar.speed = 83;
+            unit.drivePar.avoid = 78;
+            unit.drivePar.defense = 72;
+            unit.drivePar.close = 44;
+            unit.drivePar.far = 41;
+
+            unit.affinity[(int)Terrain.Plain] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Forest] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Mountain] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Waterside] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Indoor] = Affinity.VeryGood;
+            unit.affinity[(int)Terrain.Red_hot] = Affinity.Good;
+            unit.affinity[(int)Terrain.Sanctuary] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Miasma] = Affinity.Good;
+
+            #region 行動
+            Act a;
+            int i = 0;
+
+            a = new Act();
+            a.name = "デーモンロードウォーク";
+            a.type = ActType.Booster;
+            a.success = 0;
+            a.power = 27;
+            a.ap = 0;
+            a.target = ActTarget.Equip;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "ブラッディナイフ";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Fast;
+            a.ability2 = ActAbility.Drain;
+            a.success = 46;
+            a.power = 13;
+            a.ap = 10;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "デーモンヘッドハント";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Rush;
+            a.ability2 = ActAbility.Drain;
+            a.success = 4;
+            a.power = 36;
+            a.ap = 15;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "不夜城レッド";
+            a.type = ActType.AddMinusSympton;
+            a.sympton = (int)SymptonMinus.Damage;
+            a.success = 31;
+            a.power = 44;
+            a.ap = 20;
+            a.sp = 70;
+            a.target = ActTarget.EnemyAll;
+            a.rangeMin = 1;
+            a.rangeMax = 3;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "スピア・ザ・グングニル";
+            a.type = ActType.Shot;
+            a.ability1 = ActAbility.Fast;
+            a.ability2 = ActAbility.Penetrate;
+            a.sympton = (int)SymptonMinus.Stop;
+            a.success = 99;
+            a.power = 13;
+            a.ap = 24;
+            a.sp = 60;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 6;
+            a.rangeMax = 7;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "レッドマジック";
+            a.lastSpell = true;
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Drain;
+            a.success = 83;
+            a.power = 37;
+            a.ap = 24;
+            a.sp = 80;
+            a.target = ActTarget.EnemyAll;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            #endregion
+
+            return unit;
+        }
+        
         static Unit SetFlandre(int level)
         {
             Unit unit = new Unit(CharaID.Flandre);
             unit.name = "フランドール・S";
             unit.nickname = "フランドール";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\flandre");
-            unit.t_battle_origin = new Vector2(64, 128);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\flandre");
+            unit.t_battle_origin = new Vector2(128, 256);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\flandre");
 
-            unit.type = Type.Power;
-            unit.type2 = Type.Fortune;
+            unit.type = UnitType.Power;
+            unit.type2 = UnitType.Fortune;
 
             unit.level = level;
 
@@ -806,17 +1029,139 @@ namespace tohoSRPG
             return unit;
         }
 
+        static Unit SetYoumu(int level)
+        {
+            Unit unit = new Unit(CharaID.Youmu);
+            unit.name = "魂魄妖夢";
+            unit.nickname = "妖夢";
+            unit.t_battle = content.Load<Texture2D>("img\\battle\\youmu");
+            unit.t_battle_origin = new Vector2(120, 238);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\youmu");
+
+            unit.type = UnitType.Technic;
+            unit.type2 = UnitType.Power;
+
+            unit.level = level;
+
+            unit.pHP = 205;
+
+            unit.normalPar.speed = 34;
+            unit.normalPar.avoid = 43;
+            unit.normalPar.defense = 21;
+            unit.normalPar.close = 38;
+            unit.normalPar.far = 0;
+
+            unit.drivePar.speed = 55;
+            unit.drivePar.avoid = 57;
+            unit.drivePar.defense = 25;
+            unit.drivePar.close = 94;
+            unit.drivePar.far = 0;
+
+            unit.affinity[(int)Terrain.Plain] = Affinity.VeryGood;
+            unit.affinity[(int)Terrain.Forest] = Affinity.Good;
+            unit.affinity[(int)Terrain.Mountain] = Affinity.Good;
+            unit.affinity[(int)Terrain.Waterside] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Indoor] = Affinity.Good;
+            unit.affinity[(int)Terrain.Red_hot] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Sanctuary] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Miasma] = Affinity.Normal;
+
+            #region 行動
+            Act a;
+            int i = 0;
+
+            a = new Act();
+            a.name = "魂魄歩行術";
+            a.type = ActType.Booster;
+            a.success = 0;
+            a.power = 26;
+            a.ap = 0;
+            a.target = ActTarget.Equip;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "弦月斬";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Fast;
+            a.success = 57;
+            a.power = 15;
+            a.ap = 3;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 1;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "生死流転斬";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Rush;
+            a.success = 22;
+            a.power = 33;
+            a.ap = 5;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 1;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "現世斬";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Fast;
+            a.success = 75;
+            a.power = 60;
+            a.ap = 18;
+            a.sp = 50;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 3;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "幽明求聞持聡明の法";
+            a.type = ActType.AddPlusSympton;
+            a.sympton = (int)SymptonPlus.ActAgain;
+            a.success = 0;
+            a.power = 2;
+            a.ap = 0;
+            a.sp = 30;
+            a.target = ActTarget.Ally1;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "未来永劫斬";
+            a.lastSpell = true;
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Fast;
+            a.ability2 = ActAbility.Rush;
+            a.success = 99;
+            a.power = 99;
+            a.ap = 24;
+            a.sp = 70;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 1;
+            unit.acts[i++] = a;
+
+            #endregion
+
+            return unit;
+        }
+
         static Unit SetUdonge(int level)
         {
             Unit unit = new Unit(CharaID.Udonge);
             unit.name = "鈴仙・U・イナバ";
             unit.nickname = "鈴仙";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\udonge");
-            unit.t_battle_origin = new Vector2(58, 126);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\udonge");
+            unit.t_battle_origin = new Vector2(116, 252);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\udonge");
 
-            unit.type = Type.Apparition;
-            unit.type2 = Type.Technic;
+            unit.type = UnitType.Apparition;
+            unit.type2 = UnitType.Technic;
 
             unit.level = level;
 
@@ -849,7 +1194,7 @@ namespace tohoSRPG
 
             a = new Act();
             a.name = "ビジョナリチューニング";
-            a.type = ActType.Warp;
+            a.type = ActType.TransSpace;
             a.success = 11;
             a.power = 0;
             a.ap = 6;
@@ -866,7 +1211,7 @@ namespace tohoSRPG
             a.power = 0;
             a.ap = 16;
             a.target = ActTarget.Enemy1;
-            a.rangeMin = 1;
+            a.rangeMin = 2;
             a.rangeMax = 3;
             unit.acts[i++] = a;
 
@@ -935,11 +1280,11 @@ namespace tohoSRPG
             unit.name = "射命丸文";
             unit.nickname = "文";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\aya");
-            unit.t_battle_origin = new Vector2(36, 124);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\aya");
+            unit.t_battle_origin = new Vector2(72, 248);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\aya");
 
-            unit.type = Type.Technic;
-            unit.type2 = Type.Fortune;
+            unit.type = UnitType.Technic;
+            unit.type2 = UnitType.Fortune;
 
             unit.level = level;
 
@@ -1050,17 +1395,135 @@ namespace tohoSRPG
             return unit;
         }
 
+        static Unit SetSanae(int level)
+        {
+            Unit unit = new Unit(CharaID.Sanae);
+            unit.name = "東風谷早苗";
+            unit.nickname = "早苗";
+            unit.t_battle = content.Load<Texture2D>("img\\battle\\sanae");
+            unit.t_battle_origin = new Vector2(128, 242);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\sanae");
+
+            unit.type = UnitType.Guard;
+            unit.type2 = UnitType.Fortune;
+
+            unit.level = level;
+
+            unit.pHP = 185;
+
+            unit.normalPar.speed = 24;
+            unit.normalPar.avoid = 22;
+            unit.normalPar.defense = 46;
+            unit.normalPar.close = 14;
+            unit.normalPar.far = 13;
+
+            unit.drivePar.speed = 30;
+            unit.drivePar.avoid = 43;
+            unit.drivePar.defense = 81;
+            unit.drivePar.close = 47;
+            unit.drivePar.far = 45;
+
+            unit.affinity[(int)Terrain.Plain] = Affinity.Good;
+            unit.affinity[(int)Terrain.Forest] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Mountain] = Affinity.VeryGood;
+            unit.affinity[(int)Terrain.Waterside] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Indoor] = Affinity.Good;
+            unit.affinity[(int)Terrain.Red_hot] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Sanctuary] = Affinity.Good;
+            unit.affinity[(int)Terrain.Miasma] = Affinity.Bad;
+
+            #region 行動
+            Act a;
+            int i = 0;
+
+            a = new Act();
+            a.name = "集中の奇跡";
+            a.type = ActType.SearchEnemy;
+            a.success = 38;
+            a.power = 37;
+            a.count = 4;
+            a.target = ActTarget.AllyAll;
+            a.rangeMin = 0;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "回復の奇跡";
+            a.type = ActType.Heal;
+            a.success = 38;
+            a.power = 36;
+            a.ap = 15;
+            a.target = ActTarget.Ally1;
+            a.rangeMin = 0;
+            a.rangeMax = 5;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "治療の奇跡";
+            a.type = ActType.ClearMinusSympton;
+            a.success = 17;
+            a.power = 42;
+            a.ap = 16;
+            a.target = ActTarget.AllyEnemy1;
+            a.rangeMin = 0;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "払いの儀式";
+            a.type = ActType.SetField;
+            a.sympton = (int)FieldEffect.SympInvalid;
+            a.success = 12;
+            a.power = 0;
+            a.ap = 18;
+            a.target = ActTarget.Field;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            a.fact = '光';
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "ミラクルフルーツ";
+            a.type = ActType.Heal2;
+            a.success = 54;
+            a.power = 97;
+            a.ap = 20;
+            a.sp = 100;
+            a.target = ActTarget.AllyAll;
+            a.rangeMin = 0;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "グレイソーマタージ";
+            a.lastSpell = true;
+            a.type = ActType.SetField;
+            a.sympton = (int)FieldEffect.DamageFix;
+            a.success = 52;
+            a.power = 60;
+            a.ap = 20;
+            a.sp = 40;
+            a.target = ActTarget.Field;
+            a.rangeMin = 0;
+            a.rangeMax = 3;
+            unit.acts[i++] = a;
+
+            #endregion
+
+            return unit;
+        }
+
         static Unit SetRin(int level)
         {
             Unit unit = new Unit(CharaID.Rin);
             unit.name = "火焔猫燐";
             unit.nickname = "お燐";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\rin");
-            unit.t_battle_origin = new Vector2(67, 126);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\rin");
+            unit.t_battle_origin = new Vector2(134, 252);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\rin");
 
-            unit.type = Type.Apparition;
-            unit.type2 = Type.Guard;
+            unit.type = UnitType.Apparition;
+            unit.type2 = UnitType.Guard;
 
             unit.level = level;
 
@@ -1176,11 +1639,11 @@ namespace tohoSRPG
             unit.name = "霊烏路空";
             unit.nickname = "お空";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\utsuho");
-            unit.t_battle_origin = new Vector2(74, 122);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\utsuho");
+            unit.t_battle_origin = new Vector2(148, 244);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\utsuho");
 
-            unit.type = Type.Power;
-            unit.type2 = Type.Intelligence;
+            unit.type = UnitType.Power;
+            unit.type2 = UnitType.Intelligence;
 
             unit.level = level;
 
@@ -1294,17 +1757,257 @@ namespace tohoSRPG
             return unit;
         }
 
+        static Unit SetIchirin(int level)
+        {
+            Unit unit = new Unit(CharaID.Ichirin);
+            unit.name = "雲居一輪";
+            unit.nickname = "一輪";
+            unit.t_battle = content.Load<Texture2D>("img\\battle\\ichirin");
+            unit.t_battle_origin = new Vector2(108, 250);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\ichirin");
+
+            unit.type = UnitType.Power;
+            unit.type2 = UnitType.Guard;
+
+            unit.level = level;
+
+            unit.pHP = 260;
+
+            unit.normalPar.speed = 13;
+            unit.normalPar.avoid = 18;
+            unit.normalPar.defense = 58;
+            unit.normalPar.close = 24;
+            unit.normalPar.far = 7;
+
+            unit.drivePar.speed = 31;
+            unit.drivePar.avoid = 34;
+            unit.drivePar.defense = 89;
+            unit.drivePar.close = 83;
+            unit.drivePar.far = 22;
+
+            unit.affinity[(int)Terrain.Plain] = Affinity.VeryGood;
+            unit.affinity[(int)Terrain.Forest] = Affinity.Good;
+            unit.affinity[(int)Terrain.Mountain] = Affinity.Good;
+            unit.affinity[(int)Terrain.Waterside] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Indoor] = Affinity.Good;
+            unit.affinity[(int)Terrain.Red_hot] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Sanctuary] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Miasma] = Affinity.Good;
+
+            #region 行動
+            Act a;
+            int i = 0;
+
+            a = new Act();
+            a.name = "流流する大雲";
+            a.type = ActType.Booster;
+            a.success = 0;
+            a.power = 32;
+            a.ap = 0;
+            a.target = ActTarget.Equip;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "怒りの鉄拳";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Fast;
+            a.ability2 = ActAbility.Shock;
+            a.success = 48;
+            a.power = 12;
+            a.ap = 4;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "制裁の鉄拳";
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Rush;
+            a.ability2 = ActAbility.Shock;
+            a.success = 13;
+            a.power = 34;
+            a.ap = 8;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "げんこつスマッシュ";
+            a.type = ActType.Grapple;
+            a.success = 99;
+            a.power = 44;
+            a.ap = 20;
+            a.sp = 40;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "仏罰の野分雲";
+            a.type = ActType.Grapple;
+            a.success = 64;
+            a.power = 38;
+            a.ap = 26;
+            a.sp = 60;
+            a.target = ActTarget.EnemyAll;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "憤激の天津風ラッシュ";
+            a.lastSpell = true;
+            a.type = ActType.Grapple;
+            a.ability1 = ActAbility.Revenge;
+            a.success = 31;
+            a.power = 30;
+            a.ap = 24;
+            a.sp = 80;
+            a.target = ActTarget.Enemy1;
+            a.rangeMin = 1;
+            a.rangeMax = 2;
+            unit.acts[i++] = a;
+
+            #endregion
+
+            return unit;
+        }
+
+        static Unit SetFuto(int level)
+        {
+            Unit unit = new Unit(CharaID.Futo);
+            unit.name = "物部布都";
+            unit.nickname = "布都";
+            unit.t_battle = content.Load<Texture2D>("img\\battle\\futo");
+            unit.t_battle_origin = new Vector2(142, 252);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\futo");
+
+            unit.type = UnitType.Fortune;
+            unit.type2 = UnitType.Intelligence;
+
+            unit.level = level;
+
+            unit.pHP = 170;
+
+            unit.normalPar.speed = 24;
+            unit.normalPar.avoid = 27;
+            unit.normalPar.defense = 18;
+            unit.normalPar.close = 17;
+            unit.normalPar.far = 9;
+
+            unit.drivePar.speed = 28;
+            unit.drivePar.avoid = 56;
+            unit.drivePar.defense = 48;
+            unit.drivePar.close = 74;
+            unit.drivePar.far = 29;
+
+            unit.affinity[(int)Terrain.Plain] = Affinity.Good;
+            unit.affinity[(int)Terrain.Forest] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Mountain] = Affinity.Normal;
+            unit.affinity[(int)Terrain.Waterside] = Affinity.VeryGood;
+            unit.affinity[(int)Terrain.Indoor] = Affinity.Good;
+            unit.affinity[(int)Terrain.Red_hot] = Affinity.Bad;
+            unit.affinity[(int)Terrain.Sanctuary] = Affinity.Good;
+            unit.affinity[(int)Terrain.Miasma] = Affinity.Bad;
+
+            #region 行動
+            Act a;
+            int i = 0;
+
+            a = new Act();
+            a.name = "地脈抑制";
+            a.type = ActType.SetField;
+            a.sympton = (int)FieldEffect.DamageHalf;
+            a.success = 43;
+            a.power = 0;
+            a.count = 6;
+            a.target = ActTarget.Field;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "立向坐山";
+            a.type = ActType.BarrierDefense;
+            a.success = 42;
+            a.power = 18;
+            a.ap = 16;
+            a.target = ActTarget.AllyAll;
+            a.rangeMin = 1;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "六壬神課";
+            a.type = ActType.BarrierSpirit;
+            a.success = 12;
+            a.power = 36;
+            a.ap = 16;
+            a.target = ActTarget.AllyAll;
+            a.rangeMin = 1;
+            a.rangeMax = 4;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "太乙真火";
+            a.type = ActType.SetField;
+            a.sympton = (int)FieldEffect.HPDamage;
+            a.success = 58;
+            a.power = 22;
+            a.ap = 18;
+            a.sp = 30;
+            a.target = ActTarget.Field;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            a = new Act();
+            a.name = "三合火局";
+            a.type = ActType.SetField;
+            a.sympton = (int)FieldEffect.HitUp;
+            a.success = 34;
+            a.power = 39;
+            a.ap = 24;
+            a.sp = 40;
+            a.target = ActTarget.Field;
+            a.rangeMin = 0;
+            a.rangeMax = 0;
+            unit.acts[i++] = a;
+
+            //a = new Act();
+            //a.name = "";
+            //a.lastSpell = true;
+            //a.type = ActType.;
+            //a.success = ;
+            //a.power = ;
+            //a.ap = ;
+            //a.sp = ;
+            //a.target = ActTarget.;
+            //a.rangeMin = ;
+            //a.rangeMax = ;
+            //unit.acts[i++] = a;
+
+            #endregion
+
+            return unit;
+        }
+
         static Unit SetKokoro(int level)
         {
             Unit unit = new Unit(CharaID.Kokoro);
             unit.name = "秦こころ";
             unit.nickname = "こころ";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\kokoro");
-            unit.t_battle_origin = new Vector2(50, 126);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\kokoro");
+            unit.t_battle_origin = new Vector2(100, 252);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\kokoro");
 
-            unit.type = Type.Apparition;
-            unit.type2 = Type.Fortune;
+            unit.type = UnitType.Apparition;
+            unit.type2 = UnitType.Fortune;
 
             unit.level = level;
 
@@ -1422,11 +2125,11 @@ namespace tohoSRPG
             unit.name = "ゼロ・スーサイド";
             unit.nickname = "ゼロ";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\zero");
-            unit.t_battle_origin = new Vector2(52, 114);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\zero");
+            unit.t_battle_origin = new Vector2(104, 228);
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\zero");
 
-            unit.type = Type.Power;
-            unit.type2 = Type.Guard;
+            unit.type = UnitType.Power;
+            unit.type2 = UnitType.Guard;
 
             unit.level = level;
 
@@ -1543,10 +2246,10 @@ namespace tohoSRPG
             unit.nickname = "";
             unit.t_battle = content.Load<Texture2D>("img\\battle\\");
             unit.t_battle_origin = new Vector2(64, 110);
-            unit.t_icon = content.Load<Texture2D>("img\\icon\\chara\\");
+            unit.t_icon = content.Load<Texture2D>("img\\icon\\");
 
-            unit.type = Type.;
-            unit.type2 = Type.;
+            unit.type = UnitType.;
+            unit.type2 = UnitType.;
 
             unit.level = level;
 
@@ -1554,13 +2257,13 @@ namespace tohoSRPG
 
             unit.normalPar.speed = ;
             unit.normalPar.avoid = ;
-            unit.normalPar.defence = ;
+            unit.normalPar.defense = ;
             unit.normalPar.close = ;
             unit.normalPar.far = ;
 
             unit.drivePar.speed = ;
             unit.drivePar.avoid = ;
-            unit.drivePar.defence = ;
+            unit.drivePar.defense = ;
             unit.drivePar.close = ;
             unit.drivePar.far = ;
 

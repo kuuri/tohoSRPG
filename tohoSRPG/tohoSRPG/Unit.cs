@@ -16,8 +16,8 @@ namespace tohoSRPG
         public Texture2D t_battle;
         public Vector2 t_battle_origin;
 
-        public Type type;
-        public Type type2;
+        public UnitType type;
+        public UnitType type2;
 
         public int level;
         public int pHP;
@@ -60,15 +60,15 @@ namespace tohoSRPG
         public void DrawBattle(SpriteBatch sb, Vector2 pos, Color color, bool reverse)
         {
             if (!reverse)
-                sb.Draw(t_battle, pos, null, color, 0, t_battle_origin, 2, SpriteEffects.None, 0);
+                sb.Draw(t_battle, pos, null, color, 0, t_battle_origin, 1, SpriteEffects.None, 0);
             else
-                sb.Draw(t_battle, pos, null, color, 0, new Vector2(t_battle.Width - t_battle_origin.X, t_battle_origin.Y), 2, SpriteEffects.FlipHorizontally, 0);
+                sb.Draw(t_battle, pos, null, color, 0, new Vector2(t_battle.Width - t_battle_origin.X, t_battle_origin.Y), 1, SpriteEffects.FlipHorizontally, 0);
         }
         
         public void DrawBattle(SpriteBatch sb, Vector2 pos, Color color, float scale, bool reverse)
         {
             Rectangle rect = new Rectangle((int)pos.X, (int)(pos.Y),
-                t_battle.Width * 2, (int)(scale * t_battle.Height * 2));
+                t_battle.Width, (int)(scale * t_battle.Height));
 
             if (!reverse)
                 sb.Draw(t_battle, rect, null, color, 0, t_battle_origin, SpriteEffects.None, 0);

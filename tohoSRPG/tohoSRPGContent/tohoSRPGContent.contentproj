@@ -63,32 +63,32 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="img\icon\chara\cirno.png">
+    <Compile Include="img\icon\cirno.png">
       <Name>cirno</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\marisa.png">
+    <Compile Include="img\icon\marisa.png">
       <Name>marisa</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\reimu.png">
+    <Compile Include="img\icon\reimu.png">
       <Name>reimu</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\sanae.png">
+    <Compile Include="img\icon\sanae.png">
       <Name>sanae</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\utsuho.png">
+    <Compile Include="img\icon\utsuho.png">
       <Name>utsuho</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\zero.png">
+    <Compile Include="img\icon\zero.png">
       <Name>zero</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
@@ -157,41 +157,41 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="img\icon\system\icon001.png">
+    <Compile Include="img\system\icon001.png">
       <Name>icon001</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="img\icon\chara\aya.png">
+    <Compile Include="img\icon\aya.png">
       <Name>aya</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\flandre.png">
+    <Compile Include="img\icon\flandre.png">
       <Name>flandre</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\meirin.png">
+    <Compile Include="img\icon\meirin.png">
       <Name>meirin</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\rin.png">
+    <Compile Include="img\icon\rin.png">
       <Name>rin</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\chara\udonge.png">
+    <Compile Include="img\icon\udonge.png">
       <Name>udonge</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="img\icon\chara\kokoro.png">
+    <Compile Include="img\icon\kokoro.png">
       <Name>kokoro</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
@@ -516,21 +516,168 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="img\icon\system\icon002.png">
+    <Compile Include="img\system\icon002.png">
       <Name>icon002</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\system\icon003.png">
+    <Compile Include="img\system\icon003.png">
       <Name>icon003</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="img\icon\system\icon004.png">
+    <Compile Include="img\system\icon004.png">
       <Name>icon004</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="img\battle\riml.png">
+      <Name>riml</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="img\icon\riml.png">
+      <Name>riml</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="img\icon\futo.png">
+      <Name>futo</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\icon\ichirin.png">
+      <Name>ichirin</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\icon\remilia.png">
+      <Name>remilia</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\icon\sakuya.png">
+      <Name>sakuya</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\icon\youmu.png">
+      <Name>youmu</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="img\battle\futo.png">
+      <Name>futo</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="img\face\aya.png">
+      <Name>aya</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\cirno.png">
+      <Name>cirno</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\flandre.png">
+      <Name>flandre</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\futo.png">
+      <Name>futo</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\ichirin.png">
+      <Name>ichirin</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\kokoro.png">
+      <Name>kokoro</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\marisa.png">
+      <Name>marisa</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\meirin.png">
+      <Name>meirin</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\reimu.png">
+      <Name>reimu</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\remilia.png">
+      <Name>remilia</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\rin.png">
+      <Name>rin</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\sakuya.png">
+      <Name>sakuya</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\sanae.png">
+      <Name>sanae</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\udonge.png">
+      <Name>udonge</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\utsuho.png">
+      <Name>utsuho</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\youmu.png">
+      <Name>youmu</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="img\face\balloon.png">
+      <Name>balloon</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="img\face\balloon2.png">
+      <Name>balloon2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Content Include="scenario\test.txt">
+      <Name>test</Name>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 

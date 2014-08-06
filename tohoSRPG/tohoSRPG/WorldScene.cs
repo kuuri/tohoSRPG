@@ -49,13 +49,12 @@ namespace tohoSRPG
                 ConfrontScene.State = 0;
                 List<Unit> lu = new List<Unit>();
                 lu.Add(UnitSetting.SetUnit(CharaID.Reimu, 10));
-                //lu.Add(UnitSetting.SetUnit(CharaID.Zero, 10));
-                //lu.Add(UnitSetting.SetUnit(CharaID.Zero, 10));
-                //lu.Add(UnitSetting.SetUnit(CharaID.Zero, 10));
-                //lu.Add(UnitSetting.SetUnit(CharaID.Zero, 10));
-                ConfrontScene.SetScene("ゼロスーサイド", lu, "戦闘前セリフ", "", "勝利時セリフ", "", "敗北時セリフ", "");
+                ConfrontScene.SetScene("ゼロスーサイド", lu, "戦闘前セリフ", "勝利時セリフ", "敗北時セリフ");
                 ConfrontScene.SetMapData(Location.Shinrabansho);
                 GameBody.ChangeScene(Scene.Confront);
+
+                //TalkScene.LoadScenario("test");
+                //GameBody.ChangeScene(Scene.Talk);
             }
             else if (InputManager.GetButtonStateIsPush(InputManager.GameButton.Pause))
             {
@@ -72,7 +71,7 @@ namespace tohoSRPG
 
             spriteBatch.Begin();
 
-            Vector2 pos = new Vector2(500, 50);
+            Vector2 pos = new Vector2(804, 50);
             Helper.DrawWindow(new Rectangle((int)pos.X, (int)pos.Y, 200, 29 + 32 * nodes.Count));
             spriteBatch.Draw(tw, new Rectangle((int)pos.X + 20, (int)pos.Y + 28 + 32 * select, 10, 10), Color.Black);
             for (int i = 0; i < nodes.Count; i++)

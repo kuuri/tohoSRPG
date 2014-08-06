@@ -55,8 +55,8 @@ namespace tohoSRPG
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            graphics.PreferredBackBufferWidth = 720;
-            graphics.PreferredBackBufferHeight = 480;
+            graphics.PreferredBackBufferWidth = 1024;// 720;
+            graphics.PreferredBackBufferHeight = 640;// 480;
 
             //Form MyForm = (Form)Form.FromHandle(this.Window.Handle);
             //MyForm.MaximizeBox = false;
@@ -92,16 +92,24 @@ namespace tohoSRPG
             WorldScene.AddNode(new EventNode("博麗神社", new Vector2(300, 400), 0));
             WorldScene.AddNode(new EventNode("紅魔館", new Vector2(200, 100), 0));
 
-            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Reimu, 60));
+            TalkScene.Init(GraphicsDevice, spriteBatch, Content);
+
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Riml, 30));
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Reimu, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Marisa, 30));
-            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Sanae, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Cirno, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Meirin, 30));
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Sakuya, 30));
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Remilia, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Flandre, 30));
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Youmu, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Udonge, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Aya, 30));
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Sanae, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Rin, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Oku, 30));
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Ichirin, 30));
+            BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Futo, 30));
             BattleScene.allyUnit.Add(UnitSetting.SetUnit(CharaID.Kokoro, 30));
         }
 
@@ -146,6 +154,7 @@ namespace tohoSRPG
                             WorldScene.Update(gameTime);
                             break;
                         case Scene.Talk:
+                            TalkScene.Update(gameTime);
                             break;
                         case Scene.Confront:
                             ConfrontScene.Update(gameTime);
@@ -202,6 +211,7 @@ namespace tohoSRPG
                         WorldScene.Draw(gameTime);
                         break;
                     case Scene.Talk:
+                        TalkScene.Draw(gameTime);
                         break;
                     case Scene.Confront:
                         ConfrontScene.Draw(gameTime);

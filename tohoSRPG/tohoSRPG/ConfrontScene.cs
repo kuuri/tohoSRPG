@@ -27,12 +27,9 @@ namespace tohoSRPG
 
         static Location location;
         static string teamName;
-        static string beforeBattleWords1;
-        static string beforeBattleWords2;
-        static string victoryWords1;
-        static string victoryWords2;
-        static string defeatWords1;
-        static string defeatWords2;
+        static string beforeBattleWords;
+        static string victoryWords;
+        static string defeatWords;
         static List<Unit> allyList, enemyList;
 
         public static void Init(GraphicsDevice g, SpriteBatch s, ContentManager c)
@@ -42,7 +39,7 @@ namespace tohoSRPG
             content = c;
             font = content.Load<SpriteFont>("font\\CommonFont");
             e_dot = content.Load<Effect>("effect\\dot");
-            t_icon = content.Load<Texture2D>("img\\icon\\system\\icon001");
+            t_icon = content.Load<Texture2D>("img\\system\\icon001");
             state = 0;
             select1 = select2 = 0;
         }
@@ -196,7 +193,7 @@ namespace tohoSRPG
 
             if (state == 0 || state >= 3)
             {
-                spriteBatch.Draw(enemyList[0].t_battle, new Vector2(144, 335), null, Color.White, 0, enemyList[0].t_battle_origin, 2, SpriteEffects.None, 0);
+                enemyList[0].DrawBattle(spriteBatch, new Vector2(144, 335), Color.White, false);
 
                 Helper.DrawWindow(new Rectangle(48, 24, 336, 96));
                 Helper.DrawStringWithShadow("TEAM", new Vector2(72, 64));
@@ -227,11 +224,11 @@ namespace tohoSRPG
                 }
 
                 if (state == 0)
-                    Helper.DrawWindowBottom2(beforeBattleWords1, beforeBattleWords2);
+                    Helper.DrawWindowBottom2(beforeBattleWords);
                 else if (state == 3)
-                    Helper.DrawWindowBottom2(victoryWords1, victoryWords2);
+                    Helper.DrawWindowBottom2(victoryWords);
                 else if (state == 4)
-                    Helper.DrawWindowBottom2(defeatWords1, defeatWords2);
+                    Helper.DrawWindowBottom2(defeatWords);
             }
             else if (state == 1)
             {
@@ -292,23 +289,20 @@ namespace tohoSRPG
                 else
                     Helper.DrawSquare(new Rectangle(587, 18, 100, 32), 3, Color.Black);
 
-                Helper.DrawWindowBottom2("チームのメンバーを決めてください", "STARTで決定");
+                Helper.DrawWindowBottom2("チームのメンバーを決めてください\nSTARTで決定");
             }
 
 
             spriteBatch.End();
         }
 
-        public static void SetScene(string team, List<Unit> enelist, string before1, string before2, string victory1, string victory2, string defeat1, string defeat2)
+        public static void SetScene(string team, List<Unit> enelist, string before, string victory, string defeat)
         {
             teamName = team;
             enemyList = enelist;
-            beforeBattleWords1 = before1;
-            beforeBattleWords2 = before2;
-            victoryWords1 = victory1;
-            victoryWords2 = victory2;
-            defeatWords1 = defeat1;
-            defeatWords2 = defeat2;
+            beforeBattleWords = before;
+            victoryWords = victory;
+            defeatWords = defeat;
             state = 0;
             select1 = select2 = 0;
             allyList = new List<Unit>();

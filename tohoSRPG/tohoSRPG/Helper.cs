@@ -60,25 +60,22 @@ namespace tohoSRPG
         /// <param name="str">描画するメッセージ</param>
         public static void DrawWindowBottom1(string str)
         {
-            Rectangle rect = new Rectangle(0, 432, 720, 48);
+            Rectangle rect = new Rectangle(0, 576, 1024, 64);
             spriteBatch.Draw(tw, rect, new Color(8, 8, 8));
-            spriteBatch.Draw(tw, new Rectangle(rect.X + 3, rect.Y + 3, 3, 3), Color.White);
-            spriteBatch.Draw(tw, new Rectangle(rect.X + 9, rect.Y + 3, rect.Width - 12, 3), new Color(184, 0, 0));
-            spriteBatch.Draw(tw, new Rectangle(rect.X + 3, rect.Y + 9, rect.Width - 6, rect.Height - 12), new Color(0, 184, 120));
-            spriteBatch.Draw(tw, new Rectangle(rect.X + 3, rect.Y + 12, rect.Width - 6, rect.Height - 15), new Color(0, 248, 160));
-            spriteBatch.DrawString(font, str, new Vector2(20, 443), Color.Black);
+            spriteBatch.Draw(tw, new Rectangle(rect.X + 4, rect.Y + 4, 4, 4), Color.White);
+            spriteBatch.Draw(tw, new Rectangle(rect.X + 12, rect.Y + 4, rect.Width - 16, 4), new Color(184, 0, 0));
+            spriteBatch.Draw(tw, new Rectangle(rect.X + 4, rect.Y + 12, rect.Width - 8, rect.Height - 16), new Color(0, 184, 120));
+            spriteBatch.Draw(tw, new Rectangle(rect.X + 4, rect.Y + 16, rect.Width - 8, rect.Height - 20), new Color(0, 248, 160));
+            spriteBatch.DrawString(font, str, new Vector2(20, 596), Color.Black);
         }
 
         /// <summary>
         /// 2段のメッセージウィンドウを描画する
         /// </summary>
-        /// <param name="str1">1段目のメッセージ</param>
-        /// <param name="str2">2段目のメッセージ</param>
-        public static void DrawWindowBottom2(string str1, string str2)
+        public static void DrawWindowBottom2(string str)
         {
-            DrawWindow(new Rectangle(0, 384, 720, 105));
-            spriteBatch.DrawString(font, str1, new Vector2(20, 400), Color.Black);
-            spriteBatch.DrawString(font, str2, new Vector2(20, 440), Color.Black);
+            DrawWindow(new Rectangle(0, 535, 1024, 105));
+            spriteBatch.DrawString(font, str, new Vector2(20, 555), Color.Black);
         }
 
         /// <summary>
@@ -185,21 +182,21 @@ namespace tohoSRPG
         /// <summary>
         /// 属性を表す文字列を取得する
         /// </summary>
-        public static string GetStringType(Type type)
+        public static string GetStringType(UnitType type)
         {
             switch (type)
             {
-                case Type.Power:
+                case UnitType.Power:
                     return "力";
-                case Type.Guard:
+                case UnitType.Guard:
                     return "護";
-                case Type.Intelligence:
+                case UnitType.Intelligence:
                     return "知";
-                case Type.Apparition:
+                case UnitType.Apparition:
                     return "幻";
-                case Type.Technic:
+                case UnitType.Technic:
                     return "技";
-                case Type.Fortune:
+                case UnitType.Fortune:
                     return "運";
                 default:
                     return "";
@@ -318,8 +315,6 @@ namespace tohoSRPG
                         str += "吸収";
                     else if (a.IsHaveAbility(ActAbility.Spirit))
                         str += "精神";
-                    else if (a.IsHaveAbility(ActAbility.Erosion))
-                        str += "侵蝕";
                     if (a.IsHaveAbility(ActAbility.Penetrate))
                         str += "貫通";
                     else if (a.IsHaveAbility(ActAbility.Summon))
@@ -376,6 +371,9 @@ namespace tohoSRPG
                 case ActType.Revive2:
                     return str + "蘇生2";
                 case ActType.AddPlusSympton:
+                    str = "[P]";
+                    if (a.IsTargetAll)
+                        str += "全体";
                     switch ((SymptonPlus)a.sympton)
                     {
                         case SymptonPlus.Heal:
@@ -393,6 +391,9 @@ namespace tohoSRPG
                 case ActType.ClearMinusSympton:
                     return "マイナス症状クリア";
                 case ActType.AddMinusSympton:
+                    str = "[M]";
+                    if (a.IsTargetAll)
+                        str += "全体";
                     switch ((SymptonMinus)a.sympton)
                     {
                         case SymptonMinus.Damage:
@@ -416,60 +417,34 @@ namespace tohoSRPG
                     }
                     break;
                 case ActType.AddDoubleSympton:
-                    return "聖なる傷痕、刻まれる印";
+                    return "聖痕 & 刻印";
                 case ActType.ClearPlusSympton:
                     return "プラス症状クリア";
                 case ActType.SetTrap:
+                    str = "[T]";
                     switch ((Trap)a.sympton)
                     {
                         case Trap.GrappleTrap:
-                            return "格闘トラップ";
+                            return str + "格闘トラップ";
                         case Trap.ShotTrap:
-                            return "射撃トラップ";
+                            return str + "射撃トラップ";
                         case Trap.AttackTrap:
-                            return "攻撃トラップ";
+                            return str + "攻撃トラップ";
                         case Trap.OnceClear:
-                            return "単発クリア";
+                            return str + "単発クリア";
                         case Trap.SPPlant:
-                            return "SPプラント";
+                            return str + "SPプラント";
                         case Trap.HitPromise:
-                            return "絶対命中";
+                            return str + "絶対命中";
                         case Trap.MagicCharge:
-                            return "魔力充填";
+                            return str + "魔力充填";
                     }
                     break;
                 case ActType.ClearTrap:
                     return "トラップクリア";
-                case ActType.SetCrystal:
-                    str = "結晶解放：";
-                    switch ((CrystalEffect)a.sympton)
-                    {
-                        case CrystalEffect.HPHeal:
-                            return str + "HP回復";
-                        case CrystalEffect.HPDamage:
-                            return str + "HPダメージ";
-                        case CrystalEffect.APUp:
-                            return str + "APアップ";
-                        case CrystalEffect.APDown:
-                            return str + "APダウン";
-                        case CrystalEffect.HitUp:
-                            return str + "成功アップ";
-                        case CrystalEffect.CostUp:
-                            return str + "コスト増加";
-                        case CrystalEffect.Suppression:
-                            return str + "侵蝕抑制";
-                        case CrystalEffect.AffinityDown:
-                            return str + "適正ダウン";
-                        case CrystalEffect.AffinityReverse:
-                            return str + "適正反転";
-                        case CrystalEffect.SympInvalid:
-                            return str + "症状クリア";
-                        case CrystalEffect.DamageFix:
-                            return str + "ダメージ" + a.power;
-                        case CrystalEffect.TimeStop:
-                            return str + "時間停止";
-                    }
-                    break;
+                case ActType.SetField:
+                    str = "[F]";
+                    return str + GetStringFieldEffect((FieldEffect)a.sympton, a.power);
                 case ActType.Guard:
                     return "防御";
                 case ActType.LessGuard:
@@ -482,7 +457,7 @@ namespace tohoSRPG
                     return "守護結界";
                 case ActType.BarrierSpirit:
                     return "神羅結界";
-                case ActType.Warp:
+                case ActType.TransSpace:
                     return "空間移動";
                 case ActType.SearchEnemy:
                     return "索敵";
@@ -503,24 +478,22 @@ namespace tohoSRPG
                 case ActType.SPDrain:
                     return "SPドレイン";
                 case ActType.LevelDrain:
-                    if (a.IsTargetAll)
-                        return "ドレインフォース";
-                    else
-                        return "レベルドレイン";
-                case ActType.CrystalDrain:
-                    return "結晶吸収";
-                case ActType.CrystalSubsided:
-                    return "結晶鎮静";
+                    return "レベルドレイン";
                 case ActType.Musoutensei:
                     return "博麗奥義";
+                case ActType.TimeStop:
+                    return "時間停止";
+                case ActType.MindCrash:
+                    return "精神破壊";
+
                 case ActType.Booster:
-                    return "格闘の心得";
+                    return "ブースター";
                 case ActType.Scope:
-                    return "射撃の心得";
+                    return "スコープ";
                 case ActType.DualBoost:
-                    return "戦闘の極意";
+                    return "デュアルブースト";
                 case ActType.Charge:
-                    return "活性化";
+                    return "チャージ";
                 case ActType.MoveAssist:
                     return "適地移動";
             }
@@ -558,39 +531,44 @@ namespace tohoSRPG
         }
 
         /// <summary>
-        /// 結晶効果を表す文字列を取得する
+        /// フィールド効果を表す文字列を取得する
         /// </summary>
-        public static string GetStringCrystalEffect(CrystalEffect ce, int fact = 0)
+        public static string GetStringFieldEffect(FieldEffect ce, int fact = 0)
         {
             switch (ce)
             {
-                case CrystalEffect.HPDamage:
-                    return "HPダメージ";
-                case CrystalEffect.HPHeal:
-                    return "HP回復";
-                case CrystalEffect.APUp:
+                case FieldEffect.APUp:
                     return "APアップ";
-                case CrystalEffect.APDown:
+                case FieldEffect.APDown:
                     return "APダウン";
-                case CrystalEffect.HitUp:
+                case FieldEffect.HealBanned:
+                    return "回復無効";
+                case FieldEffect.DamageHalf:
+                    return "ダメージ半減";
+                case FieldEffect.Invalid:
+                    return "効果無効";
+
+                case FieldEffect.HPDamage:
+                    return "HPダメージ";
+                case FieldEffect.HPHeal:
+                    return "HP回復";
+                case FieldEffect.HitUp:
                     return "成功アップ";
-                case CrystalEffect.CostUp:
+                case FieldEffect.CostUp:
                     return "コスト増加";
-                case CrystalEffect.Suppression:
-                    return "侵蝕抑制";
-                case CrystalEffect.AffinityDown:
-                    return "適正ダウン";
-                case CrystalEffect.AffinityReverse:
-                    return "適正反転";
-                case CrystalEffect.SympInvalid:
-                    return "症状クリア";
-                case CrystalEffect.DamageFix:
+                case FieldEffect.DamageFix:
                     return "ダメージ" + fact;
-                case CrystalEffect.TimeStop:
+                case FieldEffect.SympInvalid:
+                    return "症状クリア";
+                case FieldEffect.AffinityDown:
+                    return "適正ダウン";
+                case FieldEffect.AffinityReverse:
+                    return "相性反転";
+                case FieldEffect.TimeStop:
                     return "時間停止";
-                case CrystalEffect.ChangeTerrain:
+                case FieldEffect.ChangeTerrain:
                     return "地形変化";
-                case CrystalEffect.None:
+                case FieldEffect.None:
                 default:
                     return "－－－－－－－－";
             }
@@ -623,6 +601,36 @@ namespace tohoSRPG
         public static Vector2 GetPolarCoord(float r, float a)
         {
             return r * new Vector2((float)Math.Cos(a), (float)Math.Sin(a));
+        }
+
+        /// <summary>
+        /// Rectangleと円の衝突を判定する
+        /// </summary>
+        public static bool CheckIntersectRectCircle(Rectangle rect, Vector2 center, float rad)
+        {
+            if (Vector2.Distance(new Vector2(rect.X, rect.Y), center) <= rad)
+                return true;
+            if (Vector2.Distance(new Vector2(rect.X + rect.Width, rect.Y), center) <= rad)
+                return true;
+            if (Vector2.Distance(new Vector2(rect.X, rect.Y + rect.Height), center) <= rad)
+                return true;
+            if (Vector2.Distance(new Vector2(rect.X + rect.Width, rect.Y + rect.Height), center) <= rad)
+                return true;
+
+            if (center.X < rect.X)
+            {
+                if (center.X >= rect.X - rad && center.Y >= rect.Y && center.Y <= rect.Y + rect.Height)
+                    return true;
+            }
+            if (center.X > rect.X + rect.Width)
+            {
+                if (center.X <= rect.X + rect.Width + rad && center.Y >= rect.Y && center.Y <= rect.Y + rect.Height)
+                    return true;
+            }
+            else if (center.Y >= rect.Y - rad && center.Y <= rect.Y + rect.Height + rad)
+                return true;
+
+            return false;
         }
     }
 }

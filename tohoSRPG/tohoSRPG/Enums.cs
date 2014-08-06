@@ -29,9 +29,32 @@ namespace tohoSRPG
     /// <summary>
     /// 属性
     /// </summary>
-    public enum Type
+    public enum UnitType
     {
-        Power, Guard, Intelligence, Apparition, Technic, Fortune
+        /// <summary>
+        /// 力
+        /// </summary>
+        Power,
+        /// <summary>
+        /// 護
+        /// </summary>
+        Guard,
+        /// <summary>
+        /// 知
+        /// </summary>
+        Intelligence,
+        /// <summary>
+        /// 幻
+        /// </summary>
+        Apparition,
+        /// <summary>
+        /// 技
+        /// </summary>
+        Technic,
+        /// <summary>
+        /// 運
+        /// </summary>
+        Fortune
     }
 
     /// <summary>
@@ -59,19 +82,19 @@ namespace tohoSRPG
         Guard,
         LessGuard,
         SPUp,
-        SetCrystal,
+        SetField,
         SearchEnemy,
         Hide,
         UpSpeed,
         UpClose,
         UpFar,
         UpReact,
+        UpAttack,
+        UpDefense,
         LevelDrain,
-        CrystalDrain,
         Musoutensei,
 
         Shot = 100,
-        CrystalSubsided,
         AddMinusSympton,
         AddDoubleSympton,
         ClearPlusSympton,
@@ -82,8 +105,10 @@ namespace tohoSRPG
         SetTrap,
         ClearTrap,
         SPDrain,
-        Warp,
+        TransSpace,
         ClearParameter,
+        TimeStop,
+        MindCrash,
 
         Booster = 201,
         Scope,
@@ -109,7 +134,6 @@ namespace tohoSRPG
         Proficient,
         Drain,
         Spirit,
-        Erosion,
         AntiMinus,
         AntiPlus,
         AntiHuman,
@@ -162,23 +186,28 @@ namespace tohoSRPG
     }
 
     /// <summary>
-    /// 結晶効果
+    /// 効果
     /// </summary>
-    public enum CrystalEffect
+    public enum FieldEffect
     {
         None,
-        HPHeal,
-        HPDamage,
         APUp,
         APDown,
+        HealBanned,
+        DamageHalf,
+        Invalid,
+
+        HPHeal,
+        HPDamage,
         HitUp,
         CostUp,
-        Suppression,
+        DamageFix,
+        SympInvalid,
         AffinityDown,
         AffinityReverse,
-        SympInvalid,
-        DamageFix,
         TimeStop,
+        Trinity,
+
         ChangeTerrain,
     }
 
