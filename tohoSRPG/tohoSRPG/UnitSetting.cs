@@ -1505,7 +1505,7 @@ namespace tohoSRPG
             a.sp = 40;
             a.target = ActTarget.Field;
             a.rangeMin = 0;
-            a.rangeMax = 3;
+            a.rangeMax = 0;
             unit.acts[i++] = a;
 
             #endregion

@@ -193,34 +193,34 @@ namespace tohoSRPG
 
             if (state == 0 || state >= 3)
             {
-                enemyList[0].DrawBattle(spriteBatch, new Vector2(144, 335), Color.White, false);
+                enemyList[0].DrawBattle(spriteBatch, new Vector2(208, 435), Color.White, false);
 
-                Helper.DrawWindow(new Rectangle(48, 24, 336, 96));
-                Helper.DrawStringWithShadow("TEAM", new Vector2(72, 64));
-                spriteBatch.DrawString(font, teamName, new Vector2(144, 64), Color.Black);
+                Helper.DrawWindow(new Rectangle(64, 32, 448, 128));
+                Helper.DrawStringWithShadow("TEAM", new Vector2(96, 84));
+                spriteBatch.DrawString(font, teamName, new Vector2(192, 84), Color.Black);
 
-                spriteBatch.Draw(tw, new Rectangle(0, 0, 336, 48), new Color(16, 40, 16));
-                spriteBatch.Draw(tw, new Rectangle(3, 3, 330, 42), new Color(216, 40, 40));
-                spriteBatch.Draw(tw, new Rectangle(6, 6, 327, 39), new Color(248, 128, 128));
-                spriteBatch.Draw(tw, new Rectangle(3, 3, 12, 12), new Color(216, 40, 40));
-                spriteBatch.Draw(tw, new Rectangle(3, 3, 9, 9), new Color(16, 40, 16));
-                spriteBatch.Draw(tw, new Rectangle(3, 3, 6, 6), new Color(192, 192, 192));
-                spriteBatch.Draw(tw, new Rectangle(6, 6, 3, 3), Color.White);
-                Helper.DrawStringWithShadow("SPELL CARD BATTLE!", new Vector2(39, 6));
+                spriteBatch.Draw(tw, new Rectangle(0, 0, 448, 64), new Color(16, 40, 16));
+                spriteBatch.Draw(tw, new Rectangle(4, 4, 440, 56), new Color(216, 40, 40));
+                spriteBatch.Draw(tw, new Rectangle(8, 8, 436, 52), new Color(248, 128, 128));
+                spriteBatch.Draw(tw, new Rectangle(4, 4, 16, 16), new Color(216, 40, 40));
+                spriteBatch.Draw(tw, new Rectangle(4, 4, 12, 12), new Color(16, 40, 16));
+                spriteBatch.Draw(tw, new Rectangle(4, 4, 8, 8), new Color(192, 192, 192));
+                spriteBatch.Draw(tw, new Rectangle(8, 8, 4, 4), Color.White);
+                Helper.DrawStringWithShadow("SPELL CARD BATTLE!", new Vector2(52, 8));
 
-                Helper.DrawWindow(new Rectangle(384, 48, 336, 96));
+                Helper.DrawWindow(new Rectangle(512, 64, 448, 128));
                 str = Helper.GetStringLocation(location);
-                spriteBatch.DrawString(font, str, new Vector2(552 - font.MeasureString(str).X / 2, 84), Color.Black);
+                spriteBatch.DrawString(font, str, new Vector2(736 - font.MeasureString(str).X / 2, 112), Color.Black);
 
-                Helper.DrawWindow(new Rectangle(48, 312, 360, 96));
-                Helper.DrawStringWithShadow("LEADER", new Vector2(72, 336));
-                spriteBatch.DrawString(font, enemyList[0].name, new Vector2(162, 336), Color.Black);
+                Helper.DrawWindow(new Rectangle(64, 416, 480, 128));
+                Helper.DrawStringWithShadow("LEADER", new Vector2(96, 448));
+                spriteBatch.DrawString(font, enemyList[0].name, new Vector2(216, 448), Color.Black);
 
-                Helper.DrawWindow(new Rectangle(432, 144, 288, 240));
+                Helper.DrawWindow(new Rectangle(576, 192, 384, 320));
                 for (int i = 1; i < enemyList.Count; i++)
                 {
-                    spriteBatch.Draw(enemyList[i].t_icon, new Vector2(444, 108 + 54 * i), Color.White);
-                    spriteBatch.DrawString(font, enemyList[i].name, new Vector2(500, 114 + 54 * i), Color.Black);
+                    spriteBatch.Draw(enemyList[i].t_icon, new Vector2(592, 144 + 72 * i), Color.White);
+                    spriteBatch.DrawString(font, enemyList[i].name, new Vector2(668, 152 + 72 * i), Color.Black);
                 }
 
                 if (state == 0)
